@@ -1,0 +1,150 @@
+    *{
+    margin: 0;
+    padding: 0;
+   
+}
+
+body{
+     background-color: #EEE4D5;
+     font-family: Georgia, 'Times New Roman', Times, serif;
+     color: black;
+}
+
+
+.destacados{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px 20px;
+    /* flex-wrap: wrap; */ /* creo que es innecesario, es para escribir líneas junto a imagen */
+}
+
+.card{
+    background-color: #EEE4D5;
+    border-radius: 10px;
+    overflow: hidden; /* recorta el contenido que sobresale */
+    width: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    
+}
+
+.multimedia{
+    max-width: 1210px;
+    margin: 50px auto;
+    padding: 20px;
+   text-align: center;
+   background-color: black;
+  
+}
+
+.multimedia h3{
+    font-size: 32px;
+    margin-bottom: 30px;
+    color: white;
+   
+}
+
+.multimedia-section{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.tematica{
+    background-color: orange;
+    box-shadow: 0 4px 12px rgba(0 ,0 , 0, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    width: auto;
+    box-sizing: border-box;
+}
+
+.tematica h4{
+    padding: 10px;
+}
+
+.tematica img{
+    width: 100%;
+    border-radius: 8px;
+}
+
+
+
+
+
+
+/*---STYLES AIDIONALES PARA BANNER--*/
+
+nav {
+    background-color: #010e3a; /*---Asigna un color de fondo azul oscuro al área del menú--*/
+}
+
+nav ul { /*---Aplica estilos a la lista <ul> dentro del <nav> (donde están los botones o enlaces del menú).--*/
+    display: flex; /*---Convierte la lista en un contenedor--*/
+    justify-content: center; /*---Centra los elementos del menú horizontalmente.--*/
+    list-style: none; /*---Elimina los puntos o viñetas predeterminados de la lista..--*/
+    padding: 0; /*---Quita los espacios internos y externos por defecto de la lista..--*/
+    margin: 0;/*---Quita los espacios internos y externos por defecto de la lista..--*/
+}
+
+nav li { 
+    margin: 0 1rem; /*---Agrega espacio horizontal de 1 rem (unidad relativa al tamaño de fuente) a los lados de cada ítem.--*/
+}
+
+nav a {
+    color: white; /*---Cambia el color del texto--*/
+    text-decoration: none; /*---CElimina el subrayado--*/
+    padding: 1rem; /*---CAgrega espacio interno alrededor del texto--*/
+    display: block; /*---Hace que cada enlace se comporte como un bloque--*/
+}
+
+nav a:hover { /*---Es un pseudo-clase que detecta la acción de pasar el mouse.--*/ 
+    background-color: #485460; /*---Cambia el color de fondo del enlace al gris azulado oscuro mientras el cursor está encima.--*/ 
+}
+/*------------------------------------*/
+
+/*---informacion de nosostros-----*/
+
+
+.certificaciones {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Tarjetas base */
+.tarjeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+  
+  color: white;
+}
+
+.tarjeta p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Tarjeta roja */
+.rojo {
+  background-color: #f9f4f4;
+ color: #010e3a;
+ border: mediumorchid;
+}
+
+/* Tarjeta amarilla */
+.amarillo {
+  background-color: #f7f7f7; 
+  color: black;
+  border: mediumorchid;
+  
+}
+
+/* Texto */
+.texto {
+  width: 80%;
+}
