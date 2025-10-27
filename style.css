@@ -361,7 +361,7 @@ body {
   right: 0;
   top: 8px;
   height: 2px;
-  background: #e8e8e8;
+  background: #666;
   border-radius: 2px;
 }
 
@@ -389,9 +389,9 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #fff;
+  background: #8f7676;
   border: 2px solid var(--rojo);
-  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  box-shadow: 0 1px 4px rgba(190, 100, 100, 0.08);
   cursor: grab;
   transition: left .25s ease;
 }
