@@ -9,21 +9,25 @@
   <script src="app.js" defer></script>
 </head>
 <body>
+<header><div data-include="componentes/header.html"></div></header> 
 
-<header>
-  <div data-include="componentes/header.html"></div>
-</header>
+<main class="contenedor pago">
+  <section>
+    <h1 class="seccion__titulo" style="margin:12px 0 16px">Resumen de compra</h1>
+    <div id="pagoLista" class="pago__lista"></div>
+  </section>
 
-<main class="contenedor" style="padding:24px 0">
-  <h1 class="seccion__titulo">Resumen</h1>
-  <p style="margin:10px 0">Artículos en el carrito: <strong data-total>0</strong></p>
-  <a href="index.html" class="boton boton--borde" style="margin-right:10px">Seguir comprando</a>
-  <button id="btnPagar" class="boton" style="background:#e11d48;color:#fff">Pagar ahora</button>
+  <aside class="pago__lado">
+    <div class="pago__box">
+      <div class="pago__row"><span>Subtotal</span><strong id="pagoSubtotal">S/ 0.00</strong></div>
+      <div class="pago__sep"></div>
+      <div class="pago__row pago__total"><span>Total</span><strong id="pagoTotal">S/ 0.00</strong></div>
+      <button id="pagoFinalizar" class="boton" style="background:#e11d48;color:#fff;width:100%;margin-top:8px">Pagar ahora</button>
+      <a href="index.html" class="boton boton--borde" style="width:100%;text-align:center">Seguir comprando</a>
+    </div>
+  </aside>
 </main>
 
-<footer>
-  <div data-include="componentes/footer.html"></div>
-</footer>
-
+<footer><div data-include="componentes/footer.html"></div></footer>
 </body>
 </html>

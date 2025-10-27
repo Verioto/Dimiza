@@ -9,11 +9,9 @@
   --gap: 24px;
   --g: 28px;
   --canal: 56px;
-
   --unete-gap: 24px;
   --unete-size: 112px;
   --unete-side: 16px;
-
   --pan-tamano: 28px;
   --pan-espacio: 8px;
   --pan-vacio: #e5e7eb;
@@ -47,7 +45,7 @@ body {
   color: var(--t);
   background: var(--fondo);
   line-height: 1.55;
-  padding-top:64px;
+  padding-top: 64px;
 }
 
 .contenedor {
@@ -294,10 +292,18 @@ body {
   scroll-behavior: smooth;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  cursor: grab;
 }
 
 .fav__marco::-webkit-scrollbar {
   display: none;
+}
+
+.fav__marco.grab {
+  cursor: grabbing;
 }
 
 .fav__marco.is-dragging {
@@ -313,6 +319,7 @@ body {
 
 .fav__item {
   min-width: clamp(260px, 22vw, 300px);
+  scroll-snap-align: start;
 }
 
 .fav__item img {
@@ -321,6 +328,7 @@ body {
   height: clamp(280px, 34vh, 380px);
   object-fit: cover;
   border-radius: 10px;
+  user-select: none;
 }
 
 .fav__meta {
@@ -371,6 +379,7 @@ body {
   background: var(--rojo);
   border-radius: 2px;
   pointer-events: none;
+  transition: width .25s ease;
 }
 
 .fav__thumb {
@@ -384,6 +393,7 @@ body {
   border: 2px solid var(--rojo);
   box-shadow: 0 1px 4px rgba(0,0,0,.08);
   cursor: grab;
+  transition: left .25s ease;
 }
 
 .fav__thumb:active {
@@ -973,4 +983,103 @@ body {
 
 .cantidad.is-max .cantidad__max {
   display: inline;
+}
+
+.pago {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  padding: 24px 0;
+}
+
+.pago__lista {
+  display: grid;
+  gap: 14px;
+}
+
+.pago__item {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+
+.pago__img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.pago__nom {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.pago__acc {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.pago__sel {
+  height: 36px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0 8px;
+  background: #fff;
+}
+
+.pago__del {
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: #f2f2f2;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.pago__precio {
+  font-weight: 700;
+}
+
+.pago__lado {
+  position: sticky;
+  top: 90px;
+  align-self: start;
+}
+
+.pago__box {
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  background: #fff;
+}
+
+.pago__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pago__sep {
+  height: 1px;
+  background: #ececec;
+}
+
+.pago__total strong {
+  font-size: 18px;
+}
+
+@media (max-width: 900px) {
+  .pago {
+    grid-template-columns: 1fr;
+  }
 }
