@@ -309,3 +309,111 @@ function iniciarCarrusel() {
   window.addEventListener('resize', actualizar)
   actualizar()
 }
+
+function enfocarFavoritos() {
+  const seccion = document.querySelector('.favoritos')
+  if (!seccion) return
+  const cab = document.querySelector('.cabecera')
+  const altoCab = cab ? cab.offsetHeight : 64
+  const rect = seccion.getBoundingClientRect()
+  const y = Math.max(0, window.scrollY + rect.top - (altoCab + 200))
+  window.scrollTo({ top: y, behavior: 'smooth' })
+
+  const marco = seccion.querySelector('.fav__marco')
+  const item = seccion.querySelector('.fav__item')
+  if (!marco || !item) return
+  const objetivo = Math.max(0, item.offsetLeft - (marco.clientWidth - item.clientWidth) / 2)
+  marco.scrollTo({ left: objetivo, behavior: 'smooth' })
+}
+
+document.addEventListener('click', e => {
+  const boton = e.target.closest('a,button')
+  if (!boton) return
+  const texto = (boton.textContent || '').trim().toUpperCase()
+  if (texto === 'COMPRAR AHORA') {
+    e.preventDefault()
+    enfocarFavoritos()
+  }
+})
+
+function normalizar(t) {
+  return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+}
+
+function irAMapa(q) {
+  const modal = document.getElementById('modalMapa')
+  const frame = document.getElementById('iframeMapa')
+  if (!modal || !frame) return
+  const consulta = q && q.length ? q : 'panaderia'
+  const url = 'https://www.google.com/maps?q=' + encodeURIComponent(consulta)
+  frame.src = url
+  modal.hidden = false
+}
+
+function cerrarMapa() {
+  const modal = document.getElementById('modalMapa')
+  const frame = document.getElementById('iframeMapa')
+  if (!modal || !frame) return
+  frame.src = ''
+  modal.hidden = true
+}
+
+function irAMapa(q) {
+  const modal = document.getElementById('modalMapa')
+  const frame = document.getElementById('iframeMapa')
+  if (!modal || !frame) return
+  const consulta = q && q.length ? q : 'panaderia'
+  const url = 'https://maps.google.com/maps?output=embed&q=' + encodeURIComponent(consulta)
+  frame.src = url
+  modal.hidden = false
+}
+
+function cerrarMapa() {
+  const modal = document.getElementById('modalMapa')
+  const frame = document.getElementById('iframeMapa')
+  if (!modal || !frame) return
+  frame.src = ''
+  modal.hidden = true
+}
+
+function normalizar(t) {
+  return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+}
+
+function enfocarItemPorNombre(busqueda) {
+  const seccion = document.querySelector('.favoritos')
+  const marco = document.querySelector('.fav__marco')
+  const items = Array.from(document.querySelectorAll('.fav__item'))
+  if (!seccion || !marco || !items.length) return
+  const nombreLimpio = normalizar(busqueda)
+  let objetivo = items.find(el => normalizar(el.querySelector('.fav__nombre')?.textContent || '').includes(nombreLimpio))
+  if (!objetivo) objetivo = items[0]
+  const cab = document.querySelector('.cabecera')
+  const altoCab = cab ? cab.offsetHeight : 64
+  const rect = seccion.getBoundingClientRect()
+  const y = Math.max(0, window.scrollY + rect.top - (altoCab + 14))
+  window.scrollTo({ top: y, behavior: 'smooth' })
+  const x = Math.max(0, objetivo.offsetLeft - (marco.clientWidth - objetivo.clientWidth) / 2)
+  marco.scrollTo({ left: x, behavior: 'smooth' })
+}
+
+document.addEventListener('click', e => {
+  const abre = e.target.closest('#abrirMapa,#eligeDireccion')
+  const cierra = e.target.closest('#cerrarMapa,#modalMapa')
+  if (abre) {
+    e.preventDefault()
+    irAMapa('')
+  }
+  if (cierra) {
+    if (cierra.id === 'modalMapa' && e.target !== cierra) return
+    cerrarMapa()
+  }
+})
+
+document.addEventListener('submit', e => {
+  if (!e.target.matches('#formBuscar')) return
+  e.preventDefault()
+  const v = e.target.querySelector('#textoBuscar')?.value || ''
+  if (!v.trim()) return
+  enfocarItemPorNombre(v)
+})

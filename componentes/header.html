@@ -3,35 +3,33 @@
     <a id="logoHome" href="index.html" aria-label="Ir al inicio">
       <img src="img/Logo.png" alt="Dimiza" id="logoImg">
     </a>
-
+    <nav class="home" aria-label="Principal">
+        <a href="index.html" class="nav__enlace">Home</a>
+        </nav>
     <nav class="navegacion" aria-label="Principal">
-      <a href="empresa/contactos.html" class="nav__enlace">Contáctanos</a>
+      <a href="contactos.html" class="nav__enlace">Contáctanos</a>
     </nav>
 
-    <a href="pedidos/index.html" class="pill direccion">
+    <a href="#" class="pill direccion" id="abrirMapa">
       <span class="material-symbols-outlined">location_on</span>
       <span>¡Comienza tu pedido! <b class="enlace-acento" id="eligeDireccion">Elige tu dirección</b></span>
     </a>
 
-    <form class="buscador" role="search">
+    <form class="buscador" id="formBuscar" role="search">
       <span class="material-symbols-outlined">search</span>
-      <input type="search" placeholder="¿Qué buscas?" aria-label="Buscar">
+      <input id="textoBuscar" type="search" placeholder="¿Qué buscas?" aria-label="Buscar">
     </form>
-
-    <a href="#login" class="usuario">
-      <span class="material-symbols-outlined">robot_2</span>
-      <div class="u-textos">
-        <small>Bienvenid@</small>
-        <strong class="u-acceso">Iniciar sesión</strong>
-      </div>
-    </a>
 
     <a href="pagar.html" class="carrito" aria-label="Carrito">
       <span class="material-symbols-outlined">lock</span>
       <span class="carrito__num">00</span>
     </a>
-
   </div>
-  
 
+  <div class="mapa-modal" id="modalMapa" hidden>
+    <div class="mapa-caja">
+      <button class="mapa-cerrar" id="cerrarMapa">×</button>
+      <iframe class="mapa-frame" id="iframeMapa" src="" loading="lazy"></iframe>
+    </div>
+  </div>
 </header>
