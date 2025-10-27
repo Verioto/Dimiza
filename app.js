@@ -1,4 +1,3 @@
-
 async function incluirPartes(){
   const nodos=document.querySelectorAll('[data-include]');
   for(const n of nodos){
@@ -8,7 +7,10 @@ async function incluirPartes(){
     n.outerHTML=html;
   }
 }
-document.addEventListener('DOMContentLoaded',incluirPartes);
+document.addEventListener('DOMContentLoaded',async()=>{
+  await incluirPartes();
+  document.dispatchEvent(new Event('partes-listas'));
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const marco = document.querySelector('.fav__marco');
@@ -201,3 +203,117 @@ if(tira){
   tira.addEventListener('mousemove',e=>{if(!down)return;e.preventDefault();const x=e.pageX-tira.offsetLeft;const w=(x-sx)*1.4;tira.scrollLeft=sl-w;});
 }
 
+function ajustarOffset(){
+  const h=document.querySelector('.cabecera');
+  if(!h)return;
+  document.body.style.paddingTop=h.offsetHeight+'px';
+}
+
+document.addEventListener('partes-listas',ajustarOffset);
+window.addEventListener('resize',ajustarOffset);
+
+let totalCarrito=0
+let items={}
+
+function cargarItems(){
+  try{ items=JSON.parse(localStorage.getItem('carrito_items')||'{}') }catch(e){ items={} }
+}
+
+function guardarItems(){
+  localStorage.setItem('carrito_items',JSON.stringify(items))
+}
+
+function totalDesdeItems(){
+  return Object.values(items).reduce((a,b)=>a+Number(b||0),0)
+}
+
+function claveDe(tarjeta){
+  const n=tarjeta.querySelector('.fav__nombre')
+  return (n?n.textContent.trim().toLowerCase():'item')
+}
+
+function pintarBadge(){
+  const b=document.querySelector('.carrito__num')
+  if(b)b.textContent=String(totalCarrito).padStart(2,'0')
+}
+
+function initCantidadYCarrito(){
+  cargarItems()
+  totalCarrito=totalDesdeItems()
+  pintarBadge()
+
+  document.addEventListener('click',e=>{
+    const menos=e.target.closest('.cantidad__btn--menos')
+    const mas=e.target.closest('.cantidad__btn--mas')
+    const agregar=e.target.closest('.fav__cta')
+    if(!menos && !mas && !agregar)return
+
+    const tarjeta=e.target.closest('.fav__item')
+    if(!tarjeta)return
+
+    const caja=tarjeta.querySelector('.cantidad')
+    const num=tarjeta.querySelector('.cantidad__num')
+    if(!caja||!num)return
+
+    let cant=Number(caja.dataset.cant||num.textContent||'1')
+
+    if(menos){
+      cant=Math.max(1,cant-1)
+      caja.dataset.cant=String(cant)
+      num.textContent=caja.dataset.cant
+      caja.classList.toggle('is-max',cant===5)
+      return
+    }
+
+    if(mas){
+      cant=Math.min(5,cant+1)
+      caja.dataset.cant=String(cant)
+      num.textContent=caja.dataset.cant
+      caja.classList.toggle('is-max',cant===5)
+      return
+    }
+
+    if(agregar){
+      const key=claveDe(tarjeta)
+      const actual=Number(items[key]||0)
+      const max=5
+      const pedido=cant
+      const nuevo=Math.min(max,actual+pedido)
+      const agregado=nuevo-actual
+      if(agregado<=0){
+        caja.classList.add('is-max')
+        num.textContent='5'
+        return
+      }
+      items[key]=nuevo
+      guardarItems()
+      totalCarrito=totalDesdeItems()
+      pintarBadge()
+      caja.dataset.cant='1'
+      num.textContent='1'
+      caja.classList.toggle('is-max',nuevo===5)
+      return
+    }
+  })
+}
+
+function initPagar(){
+  const totalEl=document.querySelector('[data-total]')
+  const pagar=document.getElementById('btnPagar')
+  if(totalEl){
+    const t=totalDesdeItems()
+    totalEl.textContent=String(t)
+  }
+  if(pagar){
+    pagar.addEventListener('click',()=>{
+      localStorage.removeItem('carrito_items')
+      localStorage.removeItem('carrito_total')
+      window.location.href='index.html'
+    })
+  }
+}
+
+document.addEventListener('partes-listas',()=>{
+  initCantidadYCarrito()
+  initPagar()
+})

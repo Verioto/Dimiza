@@ -47,6 +47,7 @@ body {
   color: var(--t);
   background: var(--fondo);
   line-height: 1.55;
+  padding-top:64px;
 }
 
 .contenedor {
@@ -56,10 +57,12 @@ body {
 }
 
 .cabecera {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 9999;
-  background: rgba(255, 255, 255, .8);
+  background: rgba(255,255,255,.8);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--line);
 }
@@ -935,4 +938,39 @@ body {
     gap: 6px;
     text-align: center;
   }
+}
+
+.cantidad {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 10px;
+}
+
+.cantidad__btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  background: #fff;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cantidad__num {
+  min-width: 18px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.cantidad__max {
+  display: none;
+  font-size: 12px;
+  color: #e11d48;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cantidad.is-max .cantidad__max {
+  display: inline;
 }
