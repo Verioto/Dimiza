@@ -8,13 +8,60 @@
   <link rel="stylesheet" href="style.css">
   <script src="app.js" defer></script>
 </head>
-<body>
-<header><div data-include="componentes/header.html"></div></header> 
+<body class="pagar">
+<header>
+  <div data-include="componentes/header.html"></div>
+</header>
 
 <main class="contenedor pago">
   <section>
     <h1 class="seccion__titulo" style="margin:12px 0 16px">Resumen de compra</h1>
     <div id="pagoLista" class="pago__lista"></div>
+
+    <section class="entrega">
+      <h2 class="seccion__titulo entrega__titulo">
+        <span class="material-symbols-outlined">local_shipping</span>
+        Tiempo de entrega
+      </h2>
+
+      <div class="entrega__modo">
+        <span>Programado</span>
+        <span class="material-symbols-outlined">check_small</span>
+      </div>
+
+      <div class="entrega__card">
+        <div class="entrega__row">
+          <div class="entrega__icon material-symbols-outlined">home</div>
+          <div class="entrega__info">
+            <strong>Recojo en Tienda: AV. LA MAR - MIRAFLORES</strong>
+            <p>Av. La Mar 770, Miraflores, Lima</p>
+            <p>Miraflores</p>
+          </div>
+          <a href="#" class="entrega__accion">Cambiar</a>
+        </div>
+
+        <div class="entrega__div"></div>
+
+        <div class="entrega__row">
+          <div class="entrega__icon material-symbols-outlined">call</div>
+          <div class="entrega__info">
+            <strong>Teléfono del comprador</strong>
+          </div>
+          <a href="#" class="entrega__accion">Agregar</a>
+        </div>
+
+        <div class="entrega__div"></div>
+
+        <div class="entrega__row">
+          <div class="entrega__icon material-symbols-outlined">event</div>
+          <div class="entrega__info">
+            <strong>Fecha y hora de entrega</strong>
+            <p id="entregaHorario">Lunes (27/10/2025) 10:00 a. m. - 11:00 a. m.</p>
+          </div>
+          <a href="#" class="entrega__accion">Agregar</a>
+        </div>
+      </div>
+    </section>
   </section>
 
   <aside class="pago__lado">
@@ -28,6 +75,8 @@
   </aside>
 </main>
 
-<footer><div data-include="componentes/footer.html"></div></footer>
+<footer>
+  <div data-include="componentes/footer.html"></div>
+</footer>
 </body>
 </html>

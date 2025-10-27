@@ -417,3 +417,4 @@ document.addEventListener('submit', e => {
   if (!v.trim()) return
   enfocarItemPorNombre(v)
 })
+

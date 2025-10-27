@@ -1410,3 +1410,104 @@ body {
   line-height:1;
   color:#b67e45;
 }
+
+.entrega {
+  margin-top: 18px;
+}
+
+.entrega__titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+}
+
+.entrega__modo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f6f6f6;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 8px 0 12px;
+}
+
+.entrega__modo .material-symbols-outlined {
+  background: #b67e45;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 18px;
+  padding: 3px;
+}
+
+.entrega__card {
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+}
+
+.entrega__row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 6px;
+}
+
+.entrega__div {
+  height: 1px;
+  background: #ececec;
+  margin: 0 6px;
+}
+
+.entrega__icon {
+  font-size: 18px;
+}
+
+.entrega__info strong {
+  display: block;
+  font-size: 14px;
+}
+
+.entrega__info p {
+  font-size: 13px;
+  color: #555;
+}
+
+.entrega__accion {
+  color: #b67e45;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+body.pagar {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main.pago {
+  flex: 1 0 auto;
+  padding-bottom: 32px;
+}
+
+body.pagar footer {
+  margin-top: 24px;
+}
+
+body.contacto-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main.contacto {
+  flex: 1 0 auto;
+  padding-bottom: 32px;
+}
+
+body.contacto-page footer {
+  margin-top: 24px;
+}
