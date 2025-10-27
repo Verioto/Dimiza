@@ -1,3 +1,15 @@
+
+async function incluirPartes(){
+  const nodos=document.querySelectorAll('[data-include]');
+  for(const n of nodos){
+    const url=n.getAttribute('data-include');
+    const res=await fetch(url);
+    const html=await res.text();
+    n.outerHTML=html;
+  }
+}
+document.addEventListener('DOMContentLoaded',incluirPartes);
+
 document.addEventListener('DOMContentLoaded', () => {
   const marco = document.querySelector('.fav__marco');
   const tira = document.querySelector('.fav__tira');
