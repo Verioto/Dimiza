@@ -80,20 +80,29 @@ function iniciarCantidadYCarrito() {
 
     if (agregar) {
       const key = claveDe(tarjeta);
+      const s = stockDe(key);
+      const cantSel = Math.max(1, Math.min(5, Number(caja.dataset.cant || num.textContent || '1')));
+      if (s <= 0 || cantSel > s) return;
+
       const actual = Number(items[key]?.q || 0);
-      const nuevo = Math.min(5, actual + cant);
+      const nuevo = Math.min(5, actual + cantSel);
       const agregado = nuevo - actual;
       if (agregado <= 0) {
         caja.classList.add('is-max');
         num.textContent = '5';
         return;
       }
+
       const precioTxt = tarjeta.querySelector('.fav__precio')?.textContent || '0';
       const precio = parseInt((precioTxt.match(/\d+/g) || ['0']).join(''), 10) || 0;
       const img = tarjeta.querySelector('img')?.src || '';
       items[key] = { q: nuevo, p: precio, img: img };
       guardarItems();
       pintarInsignia();
+
+      disminuirStock(key, cantSel);
+      pintarStockEnTarjetas();
+
       caja.dataset.cant = '1';
       num.textContent = '1';
       caja.classList.toggle('is-max', nuevo === 5);
@@ -176,14 +185,6 @@ function iniciarPagar() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await incluirPartes();
-  ajustarOffset();
-  iniciarCantidadYCarrito();
-  iniciarPagar();
-  iniciarCarrusel();
-});
-
 window.addEventListener('resize', ajustarOffset);
 
 function desplazarSuave(elem, objetivo, duracion) {
@@ -199,222 +200,350 @@ function desplazarSuave(elem, objetivo, duracion) {
   requestAnimationFrame(paso);
 }
 function desplazarSuave(elem, objetivo, duracionMin) {
-  const inicio = elem.scrollLeft
-  const delta = objetivo - inicio
-  const distancia = Math.abs(delta)
-  const duracion = Math.min(900, Math.max(duracionMin, distancia * 0.6))
-  const t0 = performance.now()
+  const inicio = elem.scrollLeft;
+  const delta = objetivo - inicio;
+  const distancia = Math.abs(delta);
+  const duracion = Math.min(900, Math.max(duracionMin, distancia * 0.6));
+  const t0 = performance.now();
   function paso(t) {
-    const p = Math.min(1, (t - t0) / duracion)
-    const e = 1 - Math.pow(1 - p, 3)
-    elem.scrollLeft = inicio + delta * e
-    if (p < 1) requestAnimationFrame(paso)
+    const p = Math.min(1, (t - t0) / duracion);
+    const e = 1 - Math.pow(1 - p, 3);
+    elem.scrollLeft = inicio + delta * e;
+    if (p < 1) requestAnimationFrame(paso);
   }
-  requestAnimationFrame(paso)
+  requestAnimationFrame(paso);
 }
 
 function iniciarCarrusel() {
-  const marco = document.querySelector('.fav__marco')
-  const pista = document.querySelector('.fav__track')
-  const progreso = document.querySelector('.fav__progress')
-  const pulgar = document.querySelector('.fav__thumb')
-  if (!marco || !pista || !progreso || !pulgar) return
+  const marco = document.querySelector('.fav__marco');
+  const pista = document.querySelector('.fav__track');
+  const progreso = document.querySelector('.fav__progress');
+  const pulgar = document.querySelector('.fav__thumb');
+  if (!marco || !pista || !progreso || !pulgar) return;
 
   function limite(v, a, b) {
-    return Math.max(a, Math.min(b, v))
+    return Math.max(a, Math.min(b, v));
   }
 
   function maxScroll() {
-    return Math.max(0, marco.scrollWidth - marco.clientWidth)
+    return Math.max(0, marco.scrollWidth - marco.clientWidth);
   }
 
   function anchoUtil() {
-    return Math.max(1, pista.clientWidth - pulgar.offsetWidth)
+    return Math.max(1, pista.clientWidth - pulgar.offsetWidth);
   }
 
   function posDesdeScroll() {
-    const m = maxScroll()
-    const p = m > 0 ? marco.scrollLeft / m : 0
-    return p * anchoUtil()
+    const m = maxScroll();
+    const p = m > 0 ? marco.scrollLeft / m : 0;
+    return p * anchoUtil();
   }
 
   function scrollDesdePos(x) {
-    const a = anchoUtil()
-    const p = a > 0 ? x / a : 0
-    return p * maxScroll()
+    const a = anchoUtil();
+    const p = a > 0 ? x / a : 0;
+    return p * maxScroll();
   }
 
   function actualizar() {
-    const m = maxScroll()
-    const x = posDesdeScroll()
-    progreso.style.width = (m > 0 ? (marco.scrollLeft / m) * 100 : 0) + '%'
-    pulgar.style.left = x + 'px'
-    pista.classList.toggle('is-hidden', m <= 2)
+    const m = maxScroll();
+    const x = posDesdeScroll();
+    progreso.style.width = (m > 0 ? (marco.scrollLeft / m) * 100 : 0) + '%';
+    pulgar.style.left = x + 'px';
+    pista.classList.toggle('is-hidden', m <= 2);
   }
 
-  let arrastrando = false
-  let offsetPulgar = 0
-  let raf = null
-  let xObjetivo = 0
+  let arrastrando = false;
+  let offsetPulgar = 0;
+  let raf = null;
+  let xObjetivo = 0;
 
   function moverSegunPulgar(xCliente) {
-    const rect = pista.getBoundingClientRect()
-    let x = xCliente - rect.left - offsetPulgar
-    x = limite(x, 0, anchoUtil())
-    xObjetivo = x
+    const rect = pista.getBoundingClientRect();
+    let x = xCliente - rect.left - offsetPulgar;
+    x = limite(x, 0, anchoUtil());
+    xObjetivo = x;
     if (!raf) {
       raf = requestAnimationFrame(() => {
-        raf = null
-        const s = scrollDesdePos(xObjetivo)
-        marco.scrollLeft = s
-        progreso.style.width = (maxScroll() > 0 ? (s / maxScroll()) * 100 : 0) + '%'
-        pulgar.style.left = xObjetivo + 'px'
-      })
+        raf = null;
+        const s = scrollDesdePos(xObjetivo);
+        marco.scrollLeft = s;
+        progreso.style.width = (maxScroll() > 0 ? (s / maxScroll()) * 100 : 0) + '%';
+        pulgar.style.left = xObjetivo + 'px';
+      });
     }
   }
 
   pulgar.addEventListener('pointerdown', e => {
-    arrastrando = true
+    arrastrando = true;
     try { pulgar.setPointerCapture(e.pointerId) } catch(_) {}
-    const r = pulgar.getBoundingClientRect()
-    offsetPulgar = e.clientX - r.left
-    document.body.style.userSelect = 'none'
-  })
+    const r = pulgar.getBoundingClientRect();
+    offsetPulgar = e.clientX - r.left;
+    document.body.style.userSelect = 'none';
+  });
 
   pulgar.addEventListener('pointermove', e => {
-    if (!arrastrando) return
-    moverSegunPulgar(e.clientX)
-  })
+    if (!arrastrando) return;
+    moverSegunPulgar(e.clientX);
+  });
 
   function soltar(e) {
-    if (!arrastrando) return
-    arrastrando = false
+    if (!arrastrando) return;
+    arrastrando = false;
     try { pulgar.releasePointerCapture(e.pointerId) } catch(_) {}
-    document.body.style.userSelect = ''
+    document.body.style.userSelect = '';
   }
 
-  pulgar.addEventListener('pointerup', soltar)
-  pulgar.addEventListener('pointercancel', soltar)
-  pulgar.addEventListener('lostpointercapture', soltar)
+  pulgar.addEventListener('pointerup', soltar);
+  pulgar.addEventListener('pointercancel', soltar);
+  pulgar.addEventListener('lostpointercapture', soltar);
 
   pista.addEventListener('click', e => {
-    if (e.target === pulgar) return
-    const rect = pista.getBoundingClientRect()
-    const x = limite(e.clientX - rect.left - pulgar.offsetWidth / 2, 0, anchoUtil())
-    const s = scrollDesdePos(x)
-    marco.scrollTo({ left: s, behavior: 'smooth' })
-  })
+    if (e.target === pulgar) return;
+    const rect = pista.getBoundingClientRect();
+    const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left - pulgar.offsetWidth / 2));
+    const s = scrollDesdePos(x);
+    marco.scrollTo({ left: s, behavior: 'smooth' });
+  });
 
-  marco.addEventListener('scroll', actualizar, { passive: true })
-  window.addEventListener('resize', actualizar)
-  actualizar()
+  marco.addEventListener('scroll', actualizar, { passive: true });
+  window.addEventListener('resize', actualizar);
+  actualizar();
 }
 
 function enfocarFavoritos() {
-  const seccion = document.querySelector('.favoritos')
-  if (!seccion) return
-  const cab = document.querySelector('.cabecera')
-  const altoCab = cab ? cab.offsetHeight : 64
-  const rect = seccion.getBoundingClientRect()
-  const y = Math.max(0, window.scrollY + rect.top - (altoCab + 200))
-  window.scrollTo({ top: y, behavior: 'smooth' })
+  const seccion = document.querySelector('.favoritos');
+  if (!seccion) return;
+  const cab = document.querySelector('.cabecera');
+  const altoCab = cab ? cab.offsetHeight : 64;
+  const rect = seccion.getBoundingClientRect();
+  const y = Math.max(0, window.scrollY + rect.top - (altoCab + 200));
+  window.scrollTo({ top: y, behavior: 'smooth' });
 
-  const marco = seccion.querySelector('.fav__marco')
-  const item = seccion.querySelector('.fav__item')
-  if (!marco || !item) return
-  const objetivo = Math.max(0, item.offsetLeft - (marco.clientWidth - item.clientWidth) / 2)
-  marco.scrollTo({ left: objetivo, behavior: 'smooth' })
+  const marco = seccion.querySelector('.fav__marco');
+  const item = seccion.querySelector('.fav__item');
+  if (!marco || !item) return;
+  const objetivo = Math.max(0, item.offsetLeft - (marco.clientWidth - item.clientWidth) / 2);
+  marco.scrollTo({ left: objetivo, behavior: 'smooth' });
 }
 
 document.addEventListener('click', e => {
-  const boton = e.target.closest('a,button')
-  if (!boton) return
-  const texto = (boton.textContent || '').trim().toUpperCase()
+  const boton = e.target.closest('a,button');
+  if (!boton) return;
+  const texto = (boton.textContent || '').trim().toUpperCase();
   if (texto === 'COMPRAR AHORA') {
-    e.preventDefault()
-    enfocarFavoritos()
+    e.preventDefault();
+    enfocarFavoritos();
   }
-})
+});
 
 function normalizar(t) {
-  return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+  return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
 function irAMapa(q) {
-  const modal = document.getElementById('modalMapa')
-  const frame = document.getElementById('iframeMapa')
-  if (!modal || !frame) return
-  const consulta = q && q.length ? q : 'panaderia'
-  const url = 'https://www.google.com/maps?q=' + encodeURIComponent(consulta)
-  frame.src = url
-  modal.hidden = false
+  const modal = document.getElementById('modalMapa');
+  const frame = document.getElementById('iframeMapa');
+  if (!modal || !frame) return;
+  const consulta = q && q.length ? q : 'panaderia';
+  const url = 'https://maps.google.com/maps?output=embed&q=' + encodeURIComponent(consulta);
+  frame.src = url;
+  modal.hidden = false;
 }
 
 function cerrarMapa() {
-  const modal = document.getElementById('modalMapa')
-  const frame = document.getElementById('iframeMapa')
-  if (!modal || !frame) return
-  frame.src = ''
-  modal.hidden = true
-}
-
-function irAMapa(q) {
-  const modal = document.getElementById('modalMapa')
-  const frame = document.getElementById('iframeMapa')
-  if (!modal || !frame) return
-  const consulta = q && q.length ? q : 'panaderia'
-  const url = 'https://maps.google.com/maps?output=embed&q=' + encodeURIComponent(consulta)
-  frame.src = url
-  modal.hidden = false
-}
-
-function cerrarMapa() {
-  const modal = document.getElementById('modalMapa')
-  const frame = document.getElementById('iframeMapa')
-  if (!modal || !frame) return
-  frame.src = ''
-  modal.hidden = true
-}
-
-function normalizar(t) {
-  return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+  const modal = document.getElementById('modalMapa');
+  const frame = document.getElementById('iframeMapa');
+  if (!modal || !frame) return;
+  frame.src = '';
+  modal.hidden = true;
 }
 
 function enfocarItemPorNombre(busqueda) {
-  const seccion = document.querySelector('.favoritos')
-  const marco = document.querySelector('.fav__marco')
-  const items = Array.from(document.querySelectorAll('.fav__item'))
-  if (!seccion || !marco || !items.length) return
-  const nombreLimpio = normalizar(busqueda)
-  let objetivo = items.find(el => normalizar(el.querySelector('.fav__nombre')?.textContent || '').includes(nombreLimpio))
-  if (!objetivo) objetivo = items[0]
-  const cab = document.querySelector('.cabecera')
-  const altoCab = cab ? cab.offsetHeight : 64
-  const rect = seccion.getBoundingClientRect()
-  const y = Math.max(0, window.scrollY + rect.top - (altoCab + 14))
-  window.scrollTo({ top: y, behavior: 'smooth' })
-  const x = Math.max(0, objetivo.offsetLeft - (marco.clientWidth - objetivo.clientWidth) / 2)
-  marco.scrollTo({ left: x, behavior: 'smooth' })
+  const seccion = document.querySelector('.favoritos');
+  const marco = document.querySelector('.fav__marco');
+  const itemsEls = Array.from(document.querySelectorAll('.fav__item'));
+  if (!seccion || !marco || !itemsEls.length) return;
+  const nombreLimpio = normalizar(busqueda);
+  let objetivo = itemsEls.find(el => normalizar(el.querySelector('.fav__nombre')?.textContent || '').includes(nombreLimpio));
+  if (!objetivo) objetivo = itemsEls[0];
+  const cab = document.querySelector('.cabecera');
+  const altoCab = cab ? cab.offsetHeight : 64;
+  const rect = seccion.getBoundingClientRect();
+  const y = Math.max(0, window.scrollY + rect.top - (altoCab + 14));
+  window.scrollTo({ top: y, behavior: 'smooth' });
+  const x = Math.max(0, objetivo.offsetLeft - (marco.clientWidth - objetivo.clientWidth) / 2);
+  marco.scrollTo({ left: x, behavior: 'smooth' });
 }
 
 document.addEventListener('click', e => {
-  const abre = e.target.closest('#abrirMapa,#eligeDireccion')
-  const cierra = e.target.closest('#cerrarMapa,#modalMapa')
+  const abre = e.target.closest('#abrirMapa,#eligeDireccion');
+  const cierra = e.target.closest('#cerrarMapa,#modalMapa');
   if (abre) {
-    e.preventDefault()
-    irAMapa('')
+    e.preventDefault();
+    irAMapa('');
   }
   if (cierra) {
-    if (cierra.id === 'modalMapa' && e.target !== cierra) return
-    cerrarMapa()
+    if (cierra.id === 'modalMapa' && e.target !== cierra) return;
+    cerrarMapa();
   }
-})
+});
 
 document.addEventListener('submit', e => {
-  if (!e.target.matches('#formBuscar')) return
-  e.preventDefault()
-  const v = e.target.querySelector('#textoBuscar')?.value || ''
-  if (!v.trim()) return
-  enfocarItemPorNombre(v)
-})
+  if (!e.target.matches('#formBuscar')) return;
+  e.preventDefault();
+  const v = e.target.querySelector('#textoBuscar')?.value || '';
+  if (!v.trim()) return;
+  enfocarItemPorNombre(v);
+});
 
+let inventario = {};
+
+function cargarInventario() {
+  try { inventario = JSON.parse(localStorage.getItem('inventario_dimiza') || '{}'); } catch(_) { inventario = {}; }
+}
+
+function guardarInventario() {
+  localStorage.setItem('inventario_dimiza', JSON.stringify(inventario));
+}
+
+function k(nombre) {
+  return String(nombre || '').toLowerCase().trim();
+}
+
+function stockDe(nombre) {
+  cargarInventario();
+  return Number(inventario[k(nombre)]?.s || 0);
+}
+
+function precioDe(nombre) {
+  cargarInventario();
+  return Number(inventario[k(nombre)]?.p || 0);
+}
+
+function imgDe(nombre) {
+  cargarInventario();
+  return String(inventario[k(nombre)]?.img || '');
+}
+
+function fijarProducto(nombre, s, p, img) {
+  cargarInventario();
+  const clave = k(nombre);
+  inventario[clave] = { s: Math.max(0, Number(s) || 0), p: Math.max(0, Number(p) || 0), img: img || '' };
+  guardarInventario();
+}
+
+function disminuirStock(nombre, q) {
+  cargarInventario();
+  const clave = k(nombre);
+  const s = Math.max(0, Number(inventario[clave]?.s || 0) - Number(q || 0));
+  if (inventario[clave]) inventario[clave].s = s;
+  guardarInventario();
+}
+
+function aumentarStock(nombre, q) {
+  cargarInventario();
+  const clave = k(nombre);
+  const s = Math.max(0, Number(inventario[clave]?.s || 0) + Number(q || 0));
+  if (!inventario[clave]) inventario[clave] = { s: 0, p: 0, img: '' };
+  inventario[clave].s = s;
+  guardarInventario();
+}
+
+function inicializarInventarioDesdeDom() {
+  cargarInventario();
+  document.querySelectorAll('.fav__item').forEach(t => {
+    const nombre = claveDe(t);
+    const clave = k(nombre);
+    if (!inventario[clave]) {
+      const s = Number(t.getAttribute('data-stock') || 0);
+      const precioTxt = t.querySelector('.fav__precio')?.textContent || '0';
+      const p = parseInt((precioTxt.match(/\d+/g) || ['0']).join(''), 10) || 0;
+      const img = t.querySelector('img')?.src || '';
+      inventario[clave] = { s: Math.max(0, s), p: Math.max(0, p), img: img };
+    }
+  });
+  guardarInventario();
+}
+
+function pintarStockEnTarjetas() {
+  const tarjetas = document.querySelectorAll('.fav__item');
+  tarjetas.forEach(t => {
+    const nombre = claveDe(t);
+    const s = stockDe(nombre);
+    let badge = t.querySelector('.fav__stock');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'fav__stock';
+      t.appendChild(badge);
+    }
+    badge.textContent = s > 0 ? 'Stock: ' + s : 'Sin stock';
+    t.classList.toggle('is-sin-stock', s <= 0);
+  });
+}
+
+function pintarInventario() {
+  const lista = document.getElementById('listaInventario');
+  if (!lista) return;
+  cargarInventario();
+  lista.innerHTML = '';
+  Object.keys(inventario).sort().forEach(n => {
+    const obj = inventario[n];
+    const fila = document.createElement('div');
+    fila.className = 'inventario__fila';
+    fila.innerHTML =
+      '<div class="inventario__col">' + n + '</div>' +
+      '<div class="inventario__col">' + obj.s + '</div>' +
+      '<div class="inventario__col">S/ ' + Number(obj.p).toFixed(2) + '</div>' +
+      '<div class="inventario__col">' + (obj.img || '') + '</div>' +
+      '<div class="inventario__col inventario__acciones">' +
+      '<button class="inventario__btn" data-accion="mas" data-nombre="' + n + '">+1</button>' +
+      '<button class="inventario__btn" data-accion="menos" data-nombre="' + n + '">-1</button>' +
+      '<button class="inventario__btn" data-accion="borrar" data-nombre="' + n + '">Quitar</button>' +
+      '</div>';
+    lista.appendChild(fila);
+  });
+}
+
+function iniciarInventario() {
+  const form = document.getElementById('formInventario');
+  if (!form) return;
+  cargarInventario();
+  pintarInventario();
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const n = document.getElementById('invNombre').value.trim();
+    const s = document.getElementById('invStock').value;
+    const p = document.getElementById('invPrecio').value;
+    const img = document.getElementById('invImg').value.trim();
+    if (!n) return;
+    fijarProducto(n, s, p, img);
+    pintarInventario();
+    pintarStockEnTarjetas();
+    form.reset();
+  });
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.inventario__btn');
+    if (!btn) return;
+    const acc = btn.dataset.accion;
+    const n = btn.dataset.nombre;
+    if (acc === 'mas') aumentarStock(n, 1);
+    if (acc === 'menos') disminuirStock(n, 1);
+    if (acc === 'borrar') { cargarInventario(); delete inventario[k(n)]; guardarInventario(); }
+    pintarInventario();
+    pintarStockEnTarjetas();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await incluirPartes();
+  ajustarOffset();
+  inicializarInventarioDesdeDom();
+  iniciarCantidadYCarrito();
+  iniciarPagar();
+  iniciarCarrusel();
+  pintarStockEnTarjetas();
+  iniciarInventario();
+});

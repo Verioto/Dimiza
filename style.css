@@ -1511,3 +1511,28 @@ main.contacto {
 body.contacto-page footer {
   margin-top: 24px;
 }
+
+.inventario-page .inventario { padding: 24px 0; }
+.inventario__titulo { font-size: 28px; margin-bottom: 16px; }
+.inventario__form { display: grid; grid-template-columns: 1fr 120px 140px 1fr 160px; gap: 10px; margin-bottom: 18px; align-items: center; }
+.inventario__campo { padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; }
+.inventario__guardar { padding: 10px 12px; border-radius: 10px; }
+.inventario__tabla { width: 100%; border: 1px solid #eee; border-radius: 14px; overflow: hidden; }
+.inventario__fila { display: grid; grid-template-columns: 2fr 120px 140px 2fr 180px; gap: 10px; align-items: center; padding: 12px; border-top: 1px solid #f1f1f1; }
+.inventario__fila--encabezado { background: #fafafa; font-weight: 600; border-top: 0; }
+.inventario__col { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inventario__acciones { display: flex; gap: 8px; }
+.inventario__btn { padding: 8px 10px; border: 1px solid #ddd; border-radius: 10px; background: #fff; }
+.fav__stock { font-size: 12px; margin-top: 4px; opacity: 0.8; }
+.fav__item.is-sin-stock { opacity: 0.5; pointer-events: none; }
+
+
+.fav__stock {
+  font-size: 12px;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+.fav__item.is-sin-stock {
+  opacity: 0.5;
+  pointer-events: none;
+}
