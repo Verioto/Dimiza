@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dimiza</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400..700" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+    <title>Reportes</title>
+<body>
+    <header>
+        <div data-include="componentes/header.html"></div>
+    </header>    
+    <main>
+    <section id="modulo-reportes" class="modulo-reportes">
+        <div class="reportes-menu">
+            <button class="btn-reporte" onclick="mostrarReporte('ventas', this)">Ventas</button>
+            <button class="btn-reporte" onclick="mostrarReporte('inventario', this)">Inventario</button>
+            <button class="btn-reporte" onclick="mostrarReporte('clientes', this)">Clientes</button>
+        </div>
+    <div id="reportes-contenido" class="reportes-contenido">
+        <div class="reporte-card">
+            <h3 class="reporte-titulo">Módulo de Reportes</h3>
+
+            <p class="reporte-descripcion">
+                Seleccione un reporte del menú superior para visualizar la información
+                detallada de ventas, inventario o clientes.
+            </p>
+
+            <div class="reporte-imagen">
+                <img 
+                    src="https://www.salesforce.com/mx/blog/wp-content/uploads/sites/11/2023/09/reporte-de-ventas.jpg" 
+                    alt="Vista previa de reporte"
+                >
+            </div>
+        </div>
+    </div>
+    </section>
+    </main>
+    <footer>
+        <div data-include="componentes/footer.html"></div>
+    </footer>
+</body>
+</html>

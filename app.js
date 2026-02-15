@@ -547,3 +547,133 @@ document.addEventListener('DOMContentLoaded', async () => {
   pintarStockEnTarjetas();
   iniciarInventario();
 });
+
+// reporte
+function mostrarReporte(tipo, boton) {
+
+    // Quitar estado activo a todos los botones
+    const botones = document.querySelectorAll(".btn-reporte");
+    botones.forEach(btn => btn.classList.remove("activo"));
+
+    // Activar botón seleccionado
+    boton.classList.add("activo");
+
+    const contenido = document.getElementById("reportes-contenido");
+
+    if (tipo === "ventas") {
+        contenido.innerHTML = `
+            <table>
+                <tr>
+                    <th>Fecha</th>
+                    <th>N° Venta</th>
+                    <th>Cliente</th>
+                    <th>Método Pago</th>
+                    <th>Total (S/)</th>
+                    <th>Estado</th>
+                </tr>
+                <tr>
+                    <td>01/02/2026</td>
+                    <td>V001</td>
+                    <td>Juan Pérez</td>
+                    <td>Tarjeta</td>
+                    <td>1500</td>
+                    <td>Completada</td>
+                </tr>
+                <tr>
+                    <td>02/02/2026</td>
+                    <td>V002</td>
+                    <td>María López</td>
+                    <td>Yape</td>
+                    <td>2100</td>
+                    <td>Completada</td>
+                </tr>
+                <tr>
+                    <td>03/02/2026</td>
+                    <td>V003</td>
+                    <td>Carlos Ruiz</td>
+                    <td>Efectivo</td>
+                    <td>890</td>
+                    <td>Pendiente</td>
+                </tr>
+            </table>
+        `;
+    }
+
+    if (tipo === "inventario") {
+        contenido.innerHTML = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Stock</th>
+                    <th>Precio (S/)</th>
+                    <th>Estado</th>
+                </tr>
+                <tr>
+                    <td>P001</td>
+                    <td>Laptop</td>
+                    <td>Tecnología</td>
+                    <td>12</td>
+                    <td>3200</td>
+                    <td>Disponible</td>
+                </tr>
+                <tr>
+                    <td>P002</td>
+                    <td>Mouse</td>
+                    <td>Accesorios</td>
+                    <td>40</td>
+                    <td>45</td>
+                    <td>Disponible</td>
+                </tr>
+                <tr>
+                    <td>P003</td>
+                    <td>Teclado</td>
+                    <td>Accesorios</td>
+                    <td>0</td>
+                    <td>120</td>
+                    <td>Agotado</td>
+                </tr>
+            </table>
+        `;
+    }
+
+    if (tipo === "clientes") {
+        contenido.innerHTML = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Compras</th>
+                    <th>Total Gastado (S/)</th>
+                </tr>
+                <tr>
+                    <td>C001</td>
+                    <td>Juan Pérez</td>
+                    <td>juan@mail.com</td>
+                    <td>999111222</td>
+                    <td>5</td>
+                    <td>4500</td>
+                </tr>
+                <tr>
+                    <td>C002</td>
+                    <td>María López</td>
+                    <td>maria@mail.com</td>
+                    <td>988222333</td>
+                    <td>3</td>
+                    <td>2100</td>
+                </tr>
+                <tr>
+                    <td>C003</td>
+                    <td>Carlos Ruiz</td>
+                    <td>carlos@mail.com</td>
+                    <td>977333444</td>
+                    <td>2</td>
+                    <td>890</td>
+                </tr>
+            </table>
+        `;
+    }
+}
