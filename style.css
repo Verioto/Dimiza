@@ -339,6 +339,7 @@ body {
   font-size: 15px;
   font-weight: 800;
   margin-bottom: 6px;
+  text-transform: capitalize;
 }
 
 .fav__precio {
@@ -1516,7 +1517,7 @@ body.contacto-page footer {
 .inventario__titulo { font-size: 28px; margin-bottom: 16px; }
 .inventario__form { display: grid; grid-template-columns: 1fr 120px 140px 1fr 160px; gap: 10px; margin-bottom: 18px; align-items: center; }
 .inventario__campo { padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; }
-.inventario__guardar { padding: 10px 12px; border-radius: 10px; }
+.inventario__guardar { padding: 10px 12px; border-radius: 10px; background: #b67e45; color:#fff;}
 .inventario__tabla { width: 100%; border: 1px solid #eee; border-radius: 14px; overflow: hidden; }
 .inventario__fila { display: grid; grid-template-columns: 2fr 120px 140px 2fr 180px; gap: 10px; align-items: center; padding: 12px; border-top: 1px solid #f1f1f1; }
 .inventario__fila--encabezado { background: #fafafa; font-weight: 600; border-top: 0; }
@@ -1525,7 +1526,6 @@ body.contacto-page footer {
 .inventario__btn { padding: 8px 10px; border: 1px solid #ddd; border-radius: 10px; background: #fff; }
 .fav__stock { font-size: 12px; margin-top: 4px; opacity: 0.8; }
 .fav__item.is-sin-stock { opacity: 0.5; pointer-events: none; }
-
 
 .fav__stock {
   font-size: 12px;
@@ -1536,8 +1536,6 @@ body.contacto-page footer {
   opacity: 0.5;
   pointer-events: none;
 }
-
-/* ===== MÓDULO DE REPORTES ===== */
 
 .modulo-reportes {
     background-color: #f4f6f9;
@@ -1577,7 +1575,6 @@ body.contacto-page footer {
     text-align: center;
 }
 
-/* ===== FORMATO CONTENIDO REPORTES ===== */
 .reportes-contenido {
     display: flex;
     justify-content: center;
@@ -1617,13 +1614,11 @@ body.contacto-page footer {
     background-color: #ecf0f1;
 }
 
-/* Botón activo */
 .btn-reporte.activo {
     background-color:  #793d00a0;;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Tablas de reportes */
 .reportes-contenido table {
     width: 100%;
     margin-top: 15px;
@@ -1644,4 +1639,117 @@ body.contacto-page footer {
 
 .reportes-contenido tr:nth-child(even) {
     background-color: #f2f2f2;
+}
+
+.ventana-modal-pago-qr {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: grid;
+  place-items: center;
+  z-index: 10000;
+}
+
+.ventana-modal-pago-qr[hidden] {
+  display: none;
+}
+
+.contenedor-blanco-modal-pago {
+  width: 90%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+.titulo-modal-pago {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.texto-indicacion-modal {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.imagen-codigo-qr {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  margin: 0 auto 24px auto;
+}
+
+.boton-confirmar-pago-qr {
+  background: #e11d48;
+  color: #fff;
+  width: 100%;
+  border: 0;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.grilla-todos-los-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.padding-principal-productos {
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.titulo-principal-productos {
+  font-size: 32px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 32px;
+  text-transform: capitalize;
+}
+
+.caja-login-inventario-centrada {
+  max-width: 400px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.titulo-login-inventario {
+  font-size: 24px;
+  margin-bottom: 24px;
+  text-transform: capitalize;
+}
+
+.formulario-acceso-inventario {
+  display: grid;
+  gap: 16px;
+}
+
+.campo-texto-login-inventario {
+  height: 44px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 16px;
+}
+
+.boton-ingresar-inventario {
+  height: 44px;
+  background: #b67e45;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
 }

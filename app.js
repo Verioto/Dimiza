@@ -61,40 +61,36 @@ function iniciarCantidadYCarrito() {
     if (!caja || !num) return;
 
     let cant = Number(caja.dataset.cant || num.textContent || '1');
+    const key = claveDe(tarjeta);
+    const stockActual = stockDe(key);
 
     if (menos) {
       cant = Math.max(1, cant - 1);
       caja.dataset.cant = String(cant);
       num.textContent = cant;
-      caja.classList.toggle('is-max', cant === 5);
+      caja.classList.toggle('is-max', cant >= stockActual);
       return;
     }
 
     if (mas) {
-      cant = Math.min(5, cant + 1);
+      cant = Math.min(stockActual, cant + 1);
       caja.dataset.cant = String(cant);
       num.textContent = cant;
-      caja.classList.toggle('is-max', cant === 5);
+      caja.classList.toggle('is-max', cant >= stockActual);
       return;
     }
 
     if (agregar) {
-      const key = claveDe(tarjeta);
-      const s = stockDe(key);
-      const cantSel = Math.max(1, Math.min(5, Number(caja.dataset.cant || num.textContent || '1')));
-      if (s <= 0 || cantSel > s) return;
+      const cantSel = Math.max(1, Math.min(stockActual, Number(caja.dataset.cant || num.textContent || '1')));
+      if (stockActual <= 0 || cantSel > stockActual) return;
 
       const actual = Number(items[key]?.q || 0);
-      const nuevo = Math.min(5, actual + cantSel);
-      const agregado = nuevo - actual;
-      if (agregado <= 0) {
-        caja.classList.add('is-max');
-        num.textContent = '5';
-        return;
-      }
-
+      const nuevo = actual + cantSel;
+      
       const precioTxt = tarjeta.querySelector('.fav__precio')?.textContent || '0';
-      const precio = parseInt((precioTxt.match(/\d+/g) || ['0']).join(''), 10) || 0;
+      const match = precioTxt.match(/[\d.]+/);
+      const precio = match ? parseFloat(match[0]) : 0;
+      
       const img = tarjeta.querySelector('img')?.src || '';
       items[key] = { q: nuevo, p: precio, img: img };
       guardarItems();
@@ -105,7 +101,7 @@ function iniciarCantidadYCarrito() {
 
       caja.dataset.cant = '1';
       num.textContent = '1';
-      caja.classList.toggle('is-max', nuevo === 5);
+      caja.classList.toggle('is-max', stockDe(key) <= 1);
       return;
     }
   });
@@ -129,6 +125,16 @@ function pintarPagar() {
     const q = Number(info?.q || 0);
     const p = Number(info?.p || 0);
     const img = info?.img || '';
+    
+    const stockDisponible = stockDe(nombre);
+    const maxOpciones = q + stockDisponible;
+    const limiteVisual = Math.max(1, maxOpciones);
+
+    let opcionesHtml = '';
+    for (let n = 1; n <= limiteVisual; n++) {
+      opcionesHtml += '<option' + (n === q ? ' selected' : '') + '>' + n + '</option>';
+    }
+
     const el = document.createElement('div');
     el.className = 'pago__item';
     el.innerHTML =
@@ -137,7 +143,7 @@ function pintarPagar() {
       '<div class="pago__nom">' + nombre + '</div>' +
       '<div class="pago__acc">' +
       '<select class="pago__sel">' +
-      [1, 2, 3, 4, 5].map(n => '<option' + (n === q ? ' selected' : '') + '>' + n + '</option>').join('') +
+      opcionesHtml +
       '</select>' +
       '<button class="pago__del">Quitar</button>' +
       '</div>' +
@@ -148,16 +154,20 @@ function pintarPagar() {
     el.querySelector('.pago__sel').addEventListener('change', ev => {
       let nv = Number(ev.target.value || 1);
       if (nv < 1) nv = 1;
-      if (nv > 5) nv = 5;
+      if (nv > maxOpciones) nv = maxOpciones;
       if (items[nombre]) {
+        const diferencia = nv - items[nombre].q;
         items[nombre].q = nv;
         guardarItems();
+        if (diferencia > 0) disminuirStock(nombre, diferencia);
+        if (diferencia < 0) aumentarStock(nombre, Math.abs(diferencia));
         pintarPagar();
         pintarInsignia();
       }
     });
 
     el.querySelector('.pago__del').addEventListener('click', () => {
+      aumentarStock(nombre, items[nombre].q);
       delete items[nombre];
       guardarItems();
       pintarPagar();
@@ -174,12 +184,35 @@ function pintarPagar() {
 function iniciarPagar() {
   if (document.getElementById('pagoLista')) {
     pintarPagar();
+    
     const fin = document.getElementById('pagoFinalizar');
-    if (fin) {
+    const ventanaPago = document.getElementById('ventana-modal-pago-qr');
+    const botonConfirmar = document.getElementById('boton-confirmar-pago-qr');
+
+    if (fin && ventanaPago) {
       fin.addEventListener('click', () => {
-        localStorage.removeItem('carrito_items');
-        localStorage.removeItem('carrito_total');
-        window.location.href = 'index.html';
+        ventanaPago.hidden = false;
+      });
+    }
+
+    if (botonConfirmar) {
+      botonConfirmar.addEventListener('click', () => {
+        botonConfirmar.textContent = "procesando...";
+        botonConfirmar.disabled = true;
+        botonConfirmar.style.opacity = "0.7";
+
+        setTimeout(() => {
+          botonConfirmar.textContent = "confirmado";
+          botonConfirmar.style.background = "#28a745";
+          botonConfirmar.style.opacity = "1";
+          
+          setTimeout(() => {
+            localStorage.removeItem('carrito_items');
+            localStorage.removeItem('carrito_total');
+            window.location.href = 'index.html';
+          }, 2000);
+
+        }, 10000); 
       });
     }
   }
@@ -187,18 +220,6 @@ function iniciarPagar() {
 
 window.addEventListener('resize', ajustarOffset);
 
-function desplazarSuave(elem, objetivo, duracion) {
-  const inicio = elem.scrollLeft;
-  const delta = objetivo - inicio;
-  const t0 = performance.now();
-  function paso(t) {
-    const p = Math.min(1, (t - t0) / duracion);
-    const e = 1 - Math.pow(1 - p, 3);
-    elem.scrollLeft = inicio + delta * e;
-    if (p < 1) requestAnimationFrame(paso);
-  }
-  requestAnimationFrame(paso);
-}
 function desplazarSuave(elem, objetivo, duracionMin) {
   const inicio = elem.scrollLeft;
   const delta = objetivo - inicio;
@@ -332,8 +353,10 @@ document.addEventListener('click', e => {
   if (!boton) return;
   const texto = (boton.textContent || '').trim().toUpperCase();
   if (texto === 'COMPRAR AHORA') {
-    e.preventDefault();
-    enfocarFavoritos();
+    if(boton.getAttribute('href') !== 'productos.html') {
+      e.preventDefault();
+      enfocarFavoritos();
+    }
   }
 });
 
@@ -450,20 +473,19 @@ function aumentarStock(nombre, q) {
   guardarInventario();
 }
 
-function inicializarInventarioDesdeDom() {
+function inicializarInventario() {
+  let inv = localStorage.getItem('inventario_dimiza');
+  if (!inv) {
+    const inventarioInicial = {
+      "arroz costeño 5kg": { s: 5, p: 23.50, img: "https://mercury.vtexassets.com/arquivos/ids/19109325/638191536108685794.jpg" },
+      "leche gloria tarro": { s: 8, p: 3.00, img: "https://vegaperu.vtexassets.com/arquivos/ids/166687-800-450" },
+      "aceite primor 1l": { s: 6, p: 12.90, img: "https://wongfood.vtexassets.com/arquivos/ids/709169-800-auto?v=638318353386030000" },
+      "fideos don vittorio": { s: 3, p: 2.80, img: "https://plazavea.vteximg.com.br/arquivos/ids/28135894-1000-1000/20054770.jpg" },
+      "atún florida": { s: 10, p: 5.00, img: "https://wongfood.vtexassets.com/arquivos/ids/715975-800-auto?v=638356350324830000" }
+    };
+    localStorage.setItem('inventario_dimiza', JSON.stringify(inventarioInicial));
+  }
   cargarInventario();
-  document.querySelectorAll('.fav__item').forEach(t => {
-    const nombre = claveDe(t);
-    const clave = k(nombre);
-    if (!inventario[clave]) {
-      const s = Number(t.getAttribute('data-stock') || 0);
-      const precioTxt = t.querySelector('.fav__precio')?.textContent || '0';
-      const p = parseInt((precioTxt.match(/\d+/g) || ['0']).join(''), 10) || 0;
-      const img = t.querySelector('img')?.src || '';
-      inventario[clave] = { s: Math.max(0, s), p: Math.max(0, p), img: img };
-    }
-  });
-  guardarInventario();
 }
 
 function pintarStockEnTarjetas() {
@@ -537,10 +559,103 @@ function iniciarInventario() {
   });
 }
 
+function verificarAccesoInventario() {
+  const cajaLogin = document.getElementById('contenedor-login-inventario');
+  const cajaInventario = document.getElementById('contenedor-principal-inventario');
+  if (!cajaLogin || !cajaInventario) return;
+
+  cajaLogin.hidden = false;
+  cajaInventario.hidden = true;
+
+  const formLogin = document.getElementById('formulario-acceso-inventario');
+  if (formLogin) {
+    formLogin.onsubmit = e => {
+      e.preventDefault();
+      const usu = document.getElementById('campo-texto-usuario').value;
+      const pas = document.getElementById('campo-texto-clave').value;
+      if (usu === 'admin' && pas === '0000') {
+        cajaLogin.hidden = true;
+        cajaInventario.hidden = false;
+        document.getElementById('campo-texto-usuario').value = '';
+        document.getElementById('campo-texto-clave').value = '';
+      } else {
+        alert('acceso denegado revisa tus datos');
+      }
+    };
+  }
+}
+
+function pintarCarruselInicio() {
+  const tira = document.getElementById('carrusel-inicio-dinamico');
+  if (!tira) return;
+  cargarInventario();
+  tira.innerHTML = '';
+  Object.keys(inventario).forEach(nombre => {
+    const prod = inventario[nombre];
+    const html = `
+      <article class="fav__item" data-stock="${prod.s}">
+        <img src="${prod.img || ''}" alt="${nombre}">
+        <div class="fav__meta">
+          <div class="cantidad" data-cant="1">
+            <button type="button" class="cantidad__btn cantidad__btn--menos">‹</button>
+            <span class="cantidad__num">1</span>
+            <button type="button" class="cantidad__btn cantidad__btn--mas">›</button>
+            <span class="cantidad__max">max</span>
+          </div>
+          <h4 class="fav__nombre">${nombre}</h4>
+          <p class="fav__precio">Desde S/ ${Number(prod.p).toFixed(2)}</p>
+          <a href="#ordenar" class="boton boton--borde fav__cta">Agregar</a>
+        </div>
+      </article>
+    `;
+    tira.insertAdjacentHTML('beforeend', html);
+  });
+}
+
+function pintarTodosLosProductos() {
+  const contenedorMes = document.getElementById('contenedor-productos-mes');
+  const contenedorDemas = document.getElementById('contenedor-demas-productos');
+  if (!contenedorMes || !contenedorDemas) return;
+
+  cargarInventario();
+  contenedorMes.innerHTML = '';
+  contenedorDemas.innerHTML = '';
+
+  const nombres = Object.keys(inventario);
+  nombres.forEach((nombre, index) => {
+    const prod = inventario[nombre];
+    const html = `
+      <article class="fav__item" data-stock="${prod.s}">
+        <img src="${prod.img || ''}" alt="${nombre}">
+        <div class="fav__meta">
+          <div class="cantidad" data-cant="1">
+            <button type="button" class="cantidad__btn cantidad__btn--menos">‹</button>
+            <span class="cantidad__num">1</span>
+            <button type="button" class="cantidad__btn cantidad__btn--mas">›</button>
+            <span class="cantidad__max">max</span>
+          </div>
+          <h4 class="fav__nombre">${nombre}</h4>
+          <p class="fav__precio">Desde S/ ${Number(prod.p).toFixed(2)}</p>
+          <a href="#ordenar" class="boton boton--borde fav__cta">Agregar</a>
+        </div>
+      </article>
+    `;
+    
+    if (index < 3) {
+      contenedorMes.insertAdjacentHTML('beforeend', html);
+    } else {
+      contenedorDemas.insertAdjacentHTML('beforeend', html);
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await incluirPartes();
   ajustarOffset();
-  inicializarInventarioDesdeDom();
+  inicializarInventario();
+  verificarAccesoInventario();
+  pintarCarruselInicio();
+  pintarTodosLosProductos();
   iniciarCantidadYCarrito();
   iniciarPagar();
   iniciarCarrusel();
@@ -548,18 +663,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   iniciarInventario();
 });
 
-// reporte
 function mostrarReporte(tipo, boton) {
-
-    // Quitar estado activo a todos los botones
     const botones = document.querySelectorAll(".btn-reporte");
     botones.forEach(btn => btn.classList.remove("activo"));
-
-    // Activar botón seleccionado
     boton.classList.add("activo");
-
     const contenido = document.getElementById("reportes-contenido");
-
     if (tipo === "ventas") {
         contenido.innerHTML = `
             <table>
@@ -598,7 +706,6 @@ function mostrarReporte(tipo, boton) {
             </table>
         `;
     }
-
     if (tipo === "inventario") {
         contenido.innerHTML = `
             <table>
@@ -637,7 +744,6 @@ function mostrarReporte(tipo, boton) {
             </table>
         `;
     }
-
     if (tipo === "clientes") {
         contenido.innerHTML = `
             <table>
