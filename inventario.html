@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Inventario • Dimiza</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
   <link rel="stylesheet" href="style.css">
   <script src="app.js" defer></script>
 </head>
@@ -14,26 +15,38 @@
 
   <main class="inventario">
     <div class="contenedor">
-      <h1 class="inventario__titulo">Inventario</h1>
-
-      <form class="inventario__form" id="formInventario">
-        <input class="inventario__campo" id="invNombre" placeholder="Nombre del producto">
-        <input class="inventario__campo" id="invStock" type="number" min="0" placeholder="Stock">
-        <input class="inventario__campo" id="invPrecio" type="number" min="0" step="1" placeholder="Precio S/">
-        <input class="inventario__campo" id="invImg" placeholder="URL de imagen">
-        <button class="boton inventario__guardar" type="submit">Guardar</button>
-      </form>
-
-      <div class="inventario__tabla">
-        <div class="inventario__fila inventario__fila--encabezado">
-          <div class="inventario__col">Producto</div>
-          <div class="inventario__col">Stock</div>
-          <div class="inventario__col">Precio</div>
-          <div class="inventario__col">Imagen</div>
-          <div class="inventario__col">Acciones</div>
-        </div>
-        <div id="listaInventario"></div>
+      
+      <div id="contenedor-login-inventario" class="caja-login-inventario-centrada">
+        <h2 class="titulo-login-inventario">acceso a inventario</h2>
+        <form id="formulario-acceso-inventario" class="formulario-acceso-inventario">
+          <input type="text" id="campo-texto-usuario" class="campo-texto-login-inventario" placeholder="usuario">
+          <input type="password" id="campo-texto-clave" class="campo-texto-login-inventario" placeholder="contraseña">
+          <button type="submit" class="boton-ingresar-inventario">ingresar</button>
+        </form>
       </div>
+
+      <div id="contenedor-principal-inventario" hidden>
+        <h1 class="inventario__titulo">Inventario</h1>
+        <form class="inventario__form" id="formInventario">
+          <input class="inventario__campo" id="invNombre" placeholder="Nombre del producto">
+          <input class="inventario__campo" id="invStock" type="number" min="0" placeholder="Stock">
+          <input class="inventario__campo" id="invPrecio" type="number" min="0" step="0.01" placeholder="Precio S/">
+          <input class="inventario__campo" id="invImg" placeholder="URL de imagen">
+          <button class="boton inventario__guardar" type="submit">Guardar</button>
+        </form>
+
+        <div class="inventario__tabla">
+          <div class="inventario__fila inventario__fila--encabezado">
+            <div class="inventario__col">Producto</div>
+            <div class="inventario__col">Stock</div>
+            <div class="inventario__col">Precio</div>
+            <div class="inventario__col">Imagen</div>
+            <div class="inventario__col">Acciones</div>
+          </div>
+          <div id="listaInventario"></div>
+        </div>
+      </div>
+
     </div>
   </main>
 
