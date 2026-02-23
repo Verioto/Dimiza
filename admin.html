@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administración Dimiza</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body class="inventario-page">
+  <header>
+    <div data-include="componentes/header.html"></div>
+  </header>
+
+  <main class="inventario">
+    <div class="contenedor-admin-full">
+
+      <div id="contenedor-login-inventario" class="caja-login-inventario-centrada">
+        <h2 class="titulo-login-inventario">Acceso Administrativo</h2>
+        <form id="formulario-acceso-inventario" class="formulario-acceso-inventario">
+          <input type="text" id="campo-texto-usuario" class="campo-texto-login-inventario" placeholder="Usuario">
+          <input type="password" id="campo-texto-clave" class="campo-texto-login-inventario" placeholder="Contraseña">
+          <button type="submit" class="boton-ingresar-inventario">Ingresar</button>
+        </form>
+      </div>
+
+      <div id="contenedor-principal-inventario" hidden>
+        
+        <div class="admin-pantalla-dividida">
+          
+          <div class="admin-mitad-inventario">
+            <form class="inventario__form" id="formInventario">
+              <input type="hidden" id="invNombreOriginal">
+              
+              <div class="campo-grupo">
+                <label>Marca</label>
+                <input class="inventario__campo" id="invMarca" placeholder="Ej. Faraon">
+              </div>
+              
+              <div class="campo-grupo">
+                <label>Stock</label>
+                <input class="inventario__campo" id="invStock" type="number" min="0" placeholder="Ej. 10" required>
+              </div>
+              
+              <div class="campo-grupo">
+                <label>Nombre del Producto</label>
+                <input class="inventario__campo" id="invNombre" placeholder="Ej. Arroz Añejo" required>
+              </div>
+              
+              <div class="campo-grupo">
+                <label>Unidad</label>
+                <input class="inventario__campo" id="invUnidad" placeholder="Ej. Bolsa 5kg">
+              </div>
+              
+              <div class="campo-grupo">
+                <label>Precio S/</label>
+                <input class="inventario__campo" id="invPrecio" type="number" min="0" step="0.01" placeholder="Ej. 25.90" required>
+              </div>
+              
+              <div class="campo-grupo">
+                <label>URL de Imagen</label>
+                <input class="inventario__campo" id="invImg" placeholder="Enlace de la imagen">
+              </div>
+
+              <div class="campo-grupo">
+                <label>Categoría</label>
+                <select class="inventario__campo select-tipo-producto" id="invTipo">
+                  <option value="mes">Producto del Mes</option>
+                  <option value="normal">Todos los Productos</option>
+                </select>
+              </div>
+              
+              <div class="campo-grupo btn-grupo">
+                <button class="boton inventario__guardar" type="submit">Guardar</button>
+              </div>
+            </form>
+
+            <h2 class="subtitulo-seccion-inventario-admin">Productos del Mes</h2>
+            <div class="inventario__tabla">
+              <div class="inventario__fila inventario__fila--encabezado">
+                <div class="inventario__col">Marca</div>
+                <div class="inventario__col">Stock</div>
+                <div class="inventario__col">Nombre</div>
+                <div class="inventario__col">Unidad</div>
+                <div class="inventario__col">Precio</div>
+                <div class="inventario__col">Imagen</div>
+                <div class="inventario__col centrar-texto">Acciones</div>
+              </div>
+              <div id="lista-inventario-mes"></div>
+            </div>
+
+            <h2 class="subtitulo-seccion-inventario-admin margen-superior-grande">Todos los Productos</h2>
+            <div class="inventario__tabla">
+              <div class="inventario__fila inventario__fila--encabezado">
+                <div class="inventario__col">Marca</div>
+                <div class="inventario__col">Stock</div>
+                <div class="inventario__col">Nombre</div>
+                <div class="inventario__col">Unidad</div>
+                <div class="inventario__col">Precio</div>
+                <div class="inventario__col">Imagen</div>
+                <div class="inventario__col centrar-texto">Acciones</div>
+              </div>
+              <div id="lista-inventario-todos"></div>
+            </div>
+          </div>
+
+          <div class="admin-mitad-reportes">
+            <section id="modulo-reportes" class="modulo-reportes">
+                <div class="reportes-menu">
+                    <button class="btn-reporte activo" onclick="mostrarReporte('ventas', this)">Ventas</button>
+                    <button class="btn-reporte" onclick="mostrarReporte('inventario', this)">Inventario</button>
+                    <button class="btn-reporte" onclick="mostrarReporte('clientes', this)">Clientes</button>
+                </div>
+                <div id="reportes-contenido" class="reportes-contenido">
+                    <div class="reporte-card">
+                        <h3 class="reporte-titulo">Módulo de Reportes</h3>
+                        <p class="reporte-descripcion">Seleccione un reporte del menú superior para visualizar la información.</p>
+                        <div class="reporte-imagen">
+                            <img src="https://www.salesforce.com/mx/blog/wp-content/uploads/sites/11/2023/09/reporte-de-ventas.jpg" alt="Vista previa de reporte">
+                        </div>
+                    </div>
+                </div>
+            </section>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div data-include="componentes/footer.html"></div>
+  </footer>
+</body>
+</html>

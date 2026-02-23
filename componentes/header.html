@@ -4,17 +4,9 @@
       <img src="img/Logo.png" alt="Dimiza" id="logoImg">
     </a>
 
-    <nav class="home" aria-label="Principal">
-        <a href="index.html" class="nav__enlace">Home</a>
-    </nav>
     <nav class="navegacion" aria-label="Principal">
+      <a href="index.html" class="nav__enlace">Home</a>
       <a href="contactos.html" class="nav__enlace">Contáctanos</a>
-    </nav>
-    <nav class="navegacion" aria-label="Principal">
-      <a href="inventario.html" class="nav__enlace">Inventario</a>
-    </nav>
-    <nav class="navegacion" aria-label="Principal">
-      <a href="reportes.html" class="nav__enlace">Reportes</a>
     </nav>
 
     <a href="#" class="pill direccion" id="abrirMapa">
@@ -27,10 +19,17 @@
       <input id="textoBuscar" type="search" placeholder="¿Qué buscas?" aria-label="Buscar">
     </form>
 
-    <a href="pagar.html" class="carrito" aria-label="Carrito">
-      <span class="material-symbols-outlined">lock</span>
-      <span class="carrito__num">00</span>
-    </a>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <a href="pagar.html" class="carrito" aria-label="Carrito">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span class="carrito__num">00</span>
+      </a>
+      
+      
+      <a href="admin.html" class="icono-header-persona" title="Panel de Administración">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+    </div>
   </div>
 
   <div class="mapa-modal" id="modalMapa" hidden>

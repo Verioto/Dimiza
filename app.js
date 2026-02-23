@@ -49,12 +49,13 @@ function iniciarCantidadYCarrito() {
   pintarInsignia();
 
   document.addEventListener('click', e => {
-    const menos = e.target.closest?.('.cantidad__btn--menos');
-    const mas = e.target.closest?.('.cantidad__btn--mas');
-    const agregar = e.target.closest?.('.fav__cta');
+    if (!e.target.closest) return;
+    const menos = e.target.closest('.cantidad__btn--menos');
+    const mas = e.target.closest('.cantidad__btn--mas');
+    const agregar = e.target.closest('.fav__cta');
     if (!menos && !mas && !agregar) return;
 
-    const tarjeta = e.target.closest?.('.fav__item');
+    const tarjeta = e.target.closest('.fav__item');
     if (!tarjeta) return;
 
     const caja = tarjeta.querySelector('.cantidad');
@@ -355,6 +356,7 @@ function cerrarMapa() {
 }
 
 document.addEventListener('click', e => {
+  if (!e.target.closest) return;
   const abre = e.target.closest('#abrirMapa,#eligeDireccion');
   const cierra = e.target.closest('#cerrarMapa,#modalMapa');
   if (abre) {
@@ -465,7 +467,6 @@ function pintarInventarioAdmin() {
       '<div class="inventario__col inventario__acciones">' +
       '<button type="button" class="inventario__btn" data-accion="mas" data-nombre="' + n + '" title="Sumar Stock">+1</button>' +
       '<button type="button" class="inventario__btn" data-accion="menos" data-nombre="' + n + '" title="Restar Stock">-1</button>' +
-      // AQUÍ ESTÁN LOS NUEVOS ÍCONOS ROJOS Y CERRADOS
       '<button type="button" class="inventario__btn inventario__btn--icono" data-accion="editar" data-nombre="' + n + '" title="Editar"><span class="material-symbols-outlined">edit</span></button>' +
       '<button type="button" class="inventario__btn inventario__btn--icono" data-accion="borrar" data-nombre="' + n + '" title="Eliminar"><span class="material-symbols-outlined">delete</span></button>' +
       '</div>';
@@ -520,6 +521,7 @@ function iniciarInventarioAdmin() {
   });
 
   document.addEventListener('click', e => {
+    if (!e.target.closest) return;
     const btn = e.target.closest('.inventario__btn');
     if (!btn) return;
     
@@ -577,20 +579,24 @@ function verificarAccesoInventario() {
 
   const formLogin = document.getElementById('formulario-acceso-inventario');
   if (formLogin) {
-    formLogin.onsubmit = e => {
+    formLogin.addEventListener('submit', e => {
       e.preventDefault();
-      const usu = document.getElementById('campo-texto-usuario').value;
-      const pas = document.getElementById('campo-texto-clave').value;
+      const usuInput = document.getElementById('campo-texto-usuario');
+      const pasInput = document.getElementById('campo-texto-clave');
+      
+      const usu = usuInput ? usuInput.value.trim() : '';
+      const pas = pasInput ? pasInput.value.trim() : '';
+      
       if (usu === 'admin' && pas === '0000') {
         accesoInventarioPermitido = true;
         cajaLogin.hidden = true;
         cajaInventario.hidden = false;
-        document.getElementById('campo-texto-usuario').value = '';
-        document.getElementById('campo-texto-clave').value = '';
+        if (usuInput) usuInput.value = '';
+        if (pasInput) pasInput.value = '';
       } else {
         alert('Acceso denegado. Revisa tus datos.');
       }
-    };
+    });
   }
 }
 
@@ -681,3 +687,131 @@ document.addEventListener('DOMContentLoaded', async () => {
   pintarStockEnTarjetas();
   iniciarInventarioAdmin();
 });
+
+window.mostrarReporte = function(tipo, boton) {
+    const botones = document.querySelectorAll(".btn-reporte");
+    botones.forEach(btn => btn.classList.remove("activo"));
+
+    boton.classList.add("activo");
+
+    const contenido = document.getElementById("reportes-contenido");
+    
+    if (!contenido) return;
+
+    if (tipo === "ventas") {
+        contenido.innerHTML = `
+            <table>
+                <tr>
+                    <th>Fecha</th>
+                    <th>N° Venta</th>
+                    <th>Cliente</th>
+                    <th>Método Pago</th>
+                    <th>Total (S/)</th>
+                    <th>Estado</th>
+                </tr>
+                <tr>
+                    <td>01/02/2026</td>
+                    <td>V001</td>
+                    <td>Juan Pérez</td>
+                    <td>Tarjeta</td>
+                    <td>1500</td>
+                    <td>Completada</td>
+                </tr>
+                <tr>
+                    <td>02/02/2026</td>
+                    <td>V002</td>
+                    <td>María López</td>
+                    <td>Yape</td>
+                    <td>2100</td>
+                    <td>Completada</td>
+                </tr>
+                <tr>
+                    <td>03/02/2026</td>
+                    <td>V003</td>
+                    <td>Carlos Ruiz</td>
+                    <td>Efectivo</td>
+                    <td>890</td>
+                    <td>Pendiente</td>
+                </tr>
+            </table>
+        `;
+    }
+
+    if (tipo === "inventario") {
+        contenido.innerHTML = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Stock</th>
+                    <th>Precio (S/)</th>
+                    <th>Estado</th>
+                </tr>
+                <tr>
+                    <td>P001</td>
+                    <td>Laptop</td>
+                    <td>Tecnología</td>
+                    <td>12</td>
+                    <td>3200</td>
+                    <td>Disponible</td>
+                </tr>
+                <tr>
+                    <td>P002</td>
+                    <td>Mouse</td>
+                    <td>Accesorios</td>
+                    <td>40</td>
+                    <td>45</td>
+                    <td>Disponible</td>
+                </tr>
+                <tr>
+                    <td>P003</td>
+                    <td>Teclado</td>
+                    <td>Accesorios</td>
+                    <td>0</td>
+                    <td>120</td>
+                    <td>Agotado</td>
+                </tr>
+            </table>
+        `;
+    }
+
+    if (tipo === "clientes") {
+        contenido.innerHTML = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Compras</th>
+                    <th>Total Gastado (S/)</th>
+                </tr>
+                <tr>
+                    <td>C001</td>
+                    <td>Juan Pérez</td>
+                    <td>juan@mail.com</td>
+                    <td>999111222</td>
+                    <td>5</td>
+                    <td>4500</td>
+                </tr>
+                <tr>
+                    <td>C002</td>
+                    <td>María López</td>
+                    <td>maria@mail.com</td>
+                    <td>988222333</td>
+                    <td>3</td>
+                    <td>2100</td>
+                </tr>
+                <tr>
+                    <td>C003</td>
+                    <td>Carlos Ruiz</td>
+                    <td>carlos@mail.com</td>
+                    <td>977333444</td>
+                    <td>2</td>
+                    <td>890</td>
+                </tr>
+            </table>
+        `;
+    }
+}
