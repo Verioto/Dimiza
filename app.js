@@ -14,6 +14,7 @@ function ajustarOffset() {
 }
 
 let items = {};
+let accesoInventarioPermitido = false;
 
 function cargarItems() {
   try {
@@ -188,6 +189,7 @@ function iniciarPagar() {
     const fin = document.getElementById('pagoFinalizar');
     const ventanaPago = document.getElementById('ventana-modal-pago-qr');
     const botonConfirmar = document.getElementById('boton-confirmar-pago-qr');
+    const cajaInteriorModal = document.getElementById('contenedor-blanco-modal-pago');
 
     if (fin && ventanaPago) {
       fin.addEventListener('click', () => {
@@ -202,9 +204,7 @@ function iniciarPagar() {
         botonConfirmar.style.opacity = "0.7";
 
         setTimeout(() => {
-          botonConfirmar.textContent = "confirmado";
-          botonConfirmar.style.background = "#28a745";
-          botonConfirmar.style.opacity = "1";
+          cajaInteriorModal.innerHTML = '<h2 class="titulo-agradecimiento-pago">¡Muchas gracias por comprar en Dimiza!</h2><p class="texto-agradecimiento-pago">Tu pedido se ha procesado con éxito.</p>';
           
           setTimeout(() => {
             localStorage.removeItem('carrito_items');
@@ -332,34 +332,6 @@ function iniciarCarrusel() {
   actualizar();
 }
 
-function enfocarFavoritos() {
-  const seccion = document.querySelector('.favoritos');
-  if (!seccion) return;
-  const cab = document.querySelector('.cabecera');
-  const altoCab = cab ? cab.offsetHeight : 64;
-  const rect = seccion.getBoundingClientRect();
-  const y = Math.max(0, window.scrollY + rect.top - (altoCab + 200));
-  window.scrollTo({ top: y, behavior: 'smooth' });
-
-  const marco = seccion.querySelector('.fav__marco');
-  const item = seccion.querySelector('.fav__item');
-  if (!marco || !item) return;
-  const objetivo = Math.max(0, item.offsetLeft - (marco.clientWidth - item.clientWidth) / 2);
-  marco.scrollTo({ left: objetivo, behavior: 'smooth' });
-}
-
-document.addEventListener('click', e => {
-  const boton = e.target.closest('a,button');
-  if (!boton) return;
-  const texto = (boton.textContent || '').trim().toUpperCase();
-  if (texto === 'COMPRAR AHORA') {
-    if(boton.getAttribute('href') !== 'productos.html') {
-      e.preventDefault();
-      enfocarFavoritos();
-    }
-  }
-});
-
 function normalizar(t) {
   return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
@@ -382,23 +354,6 @@ function cerrarMapa() {
   modal.hidden = true;
 }
 
-function enfocarItemPorNombre(busqueda) {
-  const seccion = document.querySelector('.favoritos');
-  const marco = document.querySelector('.fav__marco');
-  const itemsEls = Array.from(document.querySelectorAll('.fav__item'));
-  if (!seccion || !marco || !itemsEls.length) return;
-  const nombreLimpio = normalizar(busqueda);
-  let objetivo = itemsEls.find(el => normalizar(el.querySelector('.fav__nombre')?.textContent || '').includes(nombreLimpio));
-  if (!objetivo) objetivo = itemsEls[0];
-  const cab = document.querySelector('.cabecera');
-  const altoCab = cab ? cab.offsetHeight : 64;
-  const rect = seccion.getBoundingClientRect();
-  const y = Math.max(0, window.scrollY + rect.top - (altoCab + 14));
-  window.scrollTo({ top: y, behavior: 'smooth' });
-  const x = Math.max(0, objetivo.offsetLeft - (marco.clientWidth - objetivo.clientWidth) / 2);
-  marco.scrollTo({ left: x, behavior: 'smooth' });
-}
-
 document.addEventListener('click', e => {
   const abre = e.target.closest('#abrirMapa,#eligeDireccion');
   const cierra = e.target.closest('#cerrarMapa,#modalMapa');
@@ -412,18 +367,19 @@ document.addEventListener('click', e => {
   }
 });
 
-document.addEventListener('submit', e => {
-  if (!e.target.matches('#formBuscar')) return;
-  e.preventDefault();
-  const v = e.target.querySelector('#textoBuscar')?.value || '';
-  if (!v.trim()) return;
-  enfocarItemPorNombre(v);
-});
-
 let inventario = {};
 
 function cargarInventario() {
-  try { inventario = JSON.parse(localStorage.getItem('inventario_dimiza') || '{}'); } catch(_) { inventario = {}; }
+  try { 
+    inventario = JSON.parse(localStorage.getItem('inventario_dimiza') || '{}'); 
+    Object.keys(inventario).forEach(key => {
+      if (typeof inventario[key].tipo === 'undefined') inventario[key].tipo = 'mes';
+      if (typeof inventario[key].marca === 'undefined') inventario[key].marca = '';
+      if (typeof inventario[key].unidad === 'undefined') inventario[key].unidad = '';
+    });
+  } catch(_) { 
+    inventario = {}; 
+  }
 }
 
 function guardarInventario() {
@@ -439,23 +395,6 @@ function stockDe(nombre) {
   return Number(inventario[k(nombre)]?.s || 0);
 }
 
-function precioDe(nombre) {
-  cargarInventario();
-  return Number(inventario[k(nombre)]?.p || 0);
-}
-
-function imgDe(nombre) {
-  cargarInventario();
-  return String(inventario[k(nombre)]?.img || '');
-}
-
-function fijarProducto(nombre, s, p, img) {
-  cargarInventario();
-  const clave = k(nombre);
-  inventario[clave] = { s: Math.max(0, Number(s) || 0), p: Math.max(0, Number(p) || 0), img: img || '' };
-  guardarInventario();
-}
-
 function disminuirStock(nombre, q) {
   cargarInventario();
   const clave = k(nombre);
@@ -468,24 +407,23 @@ function aumentarStock(nombre, q) {
   cargarInventario();
   const clave = k(nombre);
   const s = Math.max(0, Number(inventario[clave]?.s || 0) + Number(q || 0));
-  if (!inventario[clave]) inventario[clave] = { s: 0, p: 0, img: '' };
+  if (!inventario[clave]) inventario[clave] = { s: 0, p: 0, img: '', marca: '', unidad: '', tipo: 'normal' };
   inventario[clave].s = s;
   guardarInventario();
 }
 
-function inicializarInventario() {
-  let inv = localStorage.getItem('inventario_dimiza');
-  if (!inv) {
-    const inventarioInicial = {
-      "arroz costeño 5kg": { s: 5, p: 23.50, img: "https://mercury.vtexassets.com/arquivos/ids/19109325/638191536108685794.jpg" },
-      "leche gloria tarro": { s: 8, p: 3.00, img: "https://vegaperu.vtexassets.com/arquivos/ids/166687-800-450" },
-      "aceite primor 1l": { s: 6, p: 12.90, img: "https://wongfood.vtexassets.com/arquivos/ids/709169-800-auto?v=638318353386030000" },
-      "fideos don vittorio": { s: 3, p: 2.80, img: "https://plazavea.vteximg.com.br/arquivos/ids/28135894-1000-1000/20054770.jpg" },
-      "atún florida": { s: 10, p: 5.00, img: "https://wongfood.vtexassets.com/arquivos/ids/715975-800-auto?v=638356350324830000" }
-    };
-    localStorage.setItem('inventario_dimiza', JSON.stringify(inventarioInicial));
-  }
+function fijarProductoCompleto(nombre, s, p, img, marca, unidad, tipo) {
   cargarInventario();
+  const clave = k(nombre);
+  inventario[clave] = { 
+    s: Math.max(0, Number(s) || 0), 
+    p: Math.max(0, Number(p) || 0), 
+    img: img || '',
+    marca: marca || '',
+    unidad: unidad || '1 und',
+    tipo: tipo || 'normal'
+  };
+  guardarInventario();
 }
 
 function pintarStockEnTarjetas() {
@@ -504,58 +442,123 @@ function pintarStockEnTarjetas() {
   });
 }
 
-function pintarInventario() {
-  const lista = document.getElementById('listaInventario');
-  if (!lista) return;
+function pintarInventarioAdmin() {
+  const listaMes = document.getElementById('lista-inventario-mes');
+  const listaTodos = document.getElementById('lista-inventario-todos');
+  if (!listaMes && !listaTodos) return;
+  
   cargarInventario();
-  lista.innerHTML = '';
+  if (listaMes) listaMes.innerHTML = '';
+  if (listaTodos) listaTodos.innerHTML = '';
+  
   Object.keys(inventario).sort().forEach(n => {
     const obj = inventario[n];
     const fila = document.createElement('div');
     fila.className = 'inventario__fila';
     fila.innerHTML =
-      '<div class="inventario__col">' + n + '</div>' +
-      '<div class="inventario__col">' + obj.s + '</div>' +
-      '<div class="inventario__col">S/ ' + Number(obj.p).toFixed(2) + '</div>' +
-      '<div class="inventario__col">' + (obj.img || '') + '</div>' +
+      '<div class="inventario__col">' + (obj.marca || '-') + '</div>' +
+      '<div class="inventario__col" style="font-weight:bold;">' + obj.s + '</div>' +
+      '<div class="inventario__col" title="' + n + '" style="text-transform:capitalize;">' + n + '</div>' +
+      '<div class="inventario__col">' + (obj.unidad || '-') + '</div>' +
+      '<div class="inventario__col" style="color:#b67e45; font-weight:bold;">S/ ' + Number(obj.p).toFixed(2) + '</div>' +
+      '<div class="inventario__col">' + (obj.img ? '<img src="'+obj.img+'" style="height:34px; width:100%; object-fit:contain; border-radius:4px;">' : '-') + '</div>' +
       '<div class="inventario__col inventario__acciones">' +
-      '<button class="inventario__btn" data-accion="mas" data-nombre="' + n + '">+1</button>' +
-      '<button class="inventario__btn" data-accion="menos" data-nombre="' + n + '">-1</button>' +
-      '<button class="inventario__btn" data-accion="borrar" data-nombre="' + n + '">Quitar</button>' +
+      '<button type="button" class="inventario__btn" data-accion="mas" data-nombre="' + n + '" title="Sumar Stock">+1</button>' +
+      '<button type="button" class="inventario__btn" data-accion="menos" data-nombre="' + n + '" title="Restar Stock">-1</button>' +
+      // AQUÍ ESTÁN LOS NUEVOS ÍCONOS ROJOS Y CERRADOS
+      '<button type="button" class="inventario__btn inventario__btn--icono" data-accion="editar" data-nombre="' + n + '" title="Editar"><span class="material-symbols-outlined">edit</span></button>' +
+      '<button type="button" class="inventario__btn inventario__btn--icono" data-accion="borrar" data-nombre="' + n + '" title="Eliminar"><span class="material-symbols-outlined">delete</span></button>' +
       '</div>';
-    lista.appendChild(fila);
+      
+    if (obj.tipo === 'mes' && listaMes) {
+      listaMes.appendChild(fila);
+    } else if (listaTodos) {
+      listaTodos.appendChild(fila);
+    }
   });
 }
 
-function iniciarInventario() {
+function iniciarInventarioAdmin() {
   const form = document.getElementById('formInventario');
   if (!form) return;
+  
   cargarInventario();
-  pintarInventario();
+  pintarInventarioAdmin();
 
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const n = document.getElementById('invNombre').value.trim();
-    const s = document.getElementById('invStock').value;
-    const p = document.getElementById('invPrecio').value;
-    const img = document.getElementById('invImg').value.trim();
+    
+    const inpOriginal = document.getElementById('invNombreOriginal');
+    const inpMarca = document.getElementById('invMarca');
+    const inpUnidad = document.getElementById('invUnidad');
+    const inpNombre = document.getElementById('invNombre');
+    const inpStock = document.getElementById('invStock');
+    const inpPrecio = document.getElementById('invPrecio');
+    const inpImg = document.getElementById('invImg');
+    const inpTipo = document.getElementById('invTipo');
+
+    const nombreOriginal = inpOriginal ? inpOriginal.value.trim() : '';
+    const m = inpMarca ? inpMarca.value.trim() : '';
+    const u = inpUnidad ? inpUnidad.value.trim() : '';
+    const n = inpNombre ? inpNombre.value.trim() : '';
+    const s = inpStock ? inpStock.value : '0';
+    const p = inpPrecio ? inpPrecio.value : '0';
+    const img = inpImg ? inpImg.value.trim() : '';
+    const t = inpTipo ? inpTipo.value : 'normal';
+    
     if (!n) return;
-    fijarProducto(n, s, p, img);
-    pintarInventario();
-    pintarStockEnTarjetas();
+
+    if (nombreOriginal && k(nombreOriginal) !== k(n)) {
+      delete inventario[k(nombreOriginal)];
+    }
+
+    fijarProductoCompleto(n, s, p, img, m, u, t);
+    
+    if (inpOriginal) inpOriginal.value = '';
+    pintarInventarioAdmin();
     form.reset();
   });
 
   document.addEventListener('click', e => {
     const btn = e.target.closest('.inventario__btn');
     if (!btn) return;
+    
+    e.preventDefault();
+    
     const acc = btn.dataset.accion;
     const n = btn.dataset.nombre;
-    if (acc === 'mas') aumentarStock(n, 1);
-    if (acc === 'menos') disminuirStock(n, 1);
-    if (acc === 'borrar') { cargarInventario(); delete inventario[k(n)]; guardarInventario(); }
-    pintarInventario();
-    pintarStockEnTarjetas();
+    
+    if (acc === 'mas') {
+      aumentarStock(n, 1);
+      pintarInventarioAdmin();
+    }
+    if (acc === 'menos') {
+      disminuirStock(n, 1);
+      pintarInventarioAdmin();
+    }
+    if (acc === 'borrar') { 
+      cargarInventario(); 
+      delete inventario[k(n)]; 
+      guardarInventario(); 
+      pintarInventarioAdmin();
+    }
+    if (acc === 'editar') {
+      cargarInventario();
+      const obj = inventario[k(n)];
+      if (obj) {
+        if(document.getElementById('invNombreOriginal')) document.getElementById('invNombreOriginal').value = n;
+        if(document.getElementById('invMarca')) document.getElementById('invMarca').value = obj.marca || '';
+        if(document.getElementById('invNombre')) document.getElementById('invNombre').value = n;
+        if(document.getElementById('invUnidad')) document.getElementById('invUnidad').value = obj.unidad || '';
+        if(document.getElementById('invStock')) document.getElementById('invStock').value = obj.s;
+        if(document.getElementById('invPrecio')) document.getElementById('invPrecio').value = obj.p;
+        if(document.getElementById('invImg')) document.getElementById('invImg').value = obj.img || '';
+        if(document.getElementById('invTipo')) document.getElementById('invTipo').value = obj.tipo || 'normal';
+        
+        const formEl = document.getElementById('formInventario');
+        if (formEl) formEl.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+    }
   });
 }
 
@@ -564,8 +567,13 @@ function verificarAccesoInventario() {
   const cajaInventario = document.getElementById('contenedor-principal-inventario');
   if (!cajaLogin || !cajaInventario) return;
 
-  cajaLogin.hidden = false;
-  cajaInventario.hidden = true;
+  if (accesoInventarioPermitido) {
+    cajaLogin.hidden = true;
+    cajaInventario.hidden = false;
+  } else {
+    cajaLogin.hidden = false;
+    cajaInventario.hidden = true;
+  }
 
   const formLogin = document.getElementById('formulario-acceso-inventario');
   if (formLogin) {
@@ -574,15 +582,59 @@ function verificarAccesoInventario() {
       const usu = document.getElementById('campo-texto-usuario').value;
       const pas = document.getElementById('campo-texto-clave').value;
       if (usu === 'admin' && pas === '0000') {
+        accesoInventarioPermitido = true;
         cajaLogin.hidden = true;
         cajaInventario.hidden = false;
         document.getElementById('campo-texto-usuario').value = '';
         document.getElementById('campo-texto-clave').value = '';
       } else {
-        alert('acceso denegado revisa tus datos');
+        alert('Acceso denegado. Revisa tus datos.');
       }
     };
   }
+}
+
+function generarHtmlTarjetaSupermercado(nombre, prod) {
+  const esMes = prod.tipo === 'mes';
+  const divisor = esMes ? 0.80 : 0.85;
+  const precioViejo = (prod.p / divisor).toFixed(2);
+  const textoDescto = esMes ? '-20%' : '-15% ONLINE';
+  const marcaTexto = prod.marca || 'SIN MARCA';
+  const unidadTexto = prod.unidad || '1 und';
+
+  return `
+    <article class="tarjeta-super-producto fav__item" data-stock="${prod.s}">
+      <div class="tarjeta-super-imagen-caja">
+        <span class="tarjeta-super-etiqueta-flotante">${textoDescto}</span>
+        <img src="${prod.img || ''}" alt="${nombre}">
+      </div>
+      <div class="tarjeta-super-info-caja">
+        <p class="tarjeta-super-marca">${marcaTexto}</p>
+        <h4 class="tarjeta-super-nombre fav__nombre">${nombre}</h4>
+        <p class="tarjeta-super-unidad">${unidadTexto}</p>
+        
+        <div class="tarjeta-super-precios-fila">
+          <div class="tarjeta-super-precios-col">
+            <span class="tarjeta-super-precio-viejo">S/ ${precioViejo}</span>
+            <span class="tarjeta-super-precio-nuevo fav__precio">S/ ${Number(prod.p).toFixed(2)}</span>
+          </div>
+          <span class="tarjeta-super-etiqueta-chica">${textoDescto}</span>
+        </div>
+
+        <div class="cantidad" data-cant="1">
+          <button type="button" class="cantidad__btn cantidad__btn--menos">‹</button>
+          <span class="cantidad__num">1</span>
+          <button type="button" class="cantidad__btn cantidad__btn--mas">›</button>
+          <span class="cantidad__max">max</span>
+        </div>
+        
+        <button class="tarjeta-super-boton-agregar fav__cta">
+          <span class="material-symbols-outlined icono-carrito-btn">shopping_cart</span>
+          AGREGAR
+        </button>
+      </div>
+    </article>
+  `;
 }
 
 function pintarCarruselInicio() {
@@ -592,27 +644,13 @@ function pintarCarruselInicio() {
   tira.innerHTML = '';
   Object.keys(inventario).forEach(nombre => {
     const prod = inventario[nombre];
-    const html = `
-      <article class="fav__item" data-stock="${prod.s}">
-        <img src="${prod.img || ''}" alt="${nombre}">
-        <div class="fav__meta">
-          <div class="cantidad" data-cant="1">
-            <button type="button" class="cantidad__btn cantidad__btn--menos">‹</button>
-            <span class="cantidad__num">1</span>
-            <button type="button" class="cantidad__btn cantidad__btn--mas">›</button>
-            <span class="cantidad__max">max</span>
-          </div>
-          <h4 class="fav__nombre">${nombre}</h4>
-          <p class="fav__precio">Desde S/ ${Number(prod.p).toFixed(2)}</p>
-          <a href="#ordenar" class="boton boton--borde fav__cta">Agregar</a>
-        </div>
-      </article>
-    `;
-    tira.insertAdjacentHTML('beforeend', html);
+    if (prod.tipo === 'mes') {
+      tira.insertAdjacentHTML('beforeend', generarHtmlTarjetaSupermercado(nombre, prod));
+    }
   });
 }
 
-function pintarTodosLosProductos() {
+function pintarPaginaProductos() {
   const contenedorMes = document.getElementById('contenedor-productos-mes');
   const contenedorDemas = document.getElementById('contenedor-demas-productos');
   if (!contenedorMes || !contenedorDemas) return;
@@ -621,30 +659,12 @@ function pintarTodosLosProductos() {
   contenedorMes.innerHTML = '';
   contenedorDemas.innerHTML = '';
 
-  const nombres = Object.keys(inventario);
-  nombres.forEach((nombre, index) => {
+  Object.keys(inventario).forEach(nombre => {
     const prod = inventario[nombre];
-    const html = `
-      <article class="fav__item" data-stock="${prod.s}">
-        <img src="${prod.img || ''}" alt="${nombre}">
-        <div class="fav__meta">
-          <div class="cantidad" data-cant="1">
-            <button type="button" class="cantidad__btn cantidad__btn--menos">‹</button>
-            <span class="cantidad__num">1</span>
-            <button type="button" class="cantidad__btn cantidad__btn--mas">›</button>
-            <span class="cantidad__max">max</span>
-          </div>
-          <h4 class="fav__nombre">${nombre}</h4>
-          <p class="fav__precio">Desde S/ ${Number(prod.p).toFixed(2)}</p>
-          <a href="#ordenar" class="boton boton--borde fav__cta">Agregar</a>
-        </div>
-      </article>
-    `;
-    
-    if (index < 3) {
-      contenedorMes.insertAdjacentHTML('beforeend', html);
+    if (prod.tipo === 'mes') {
+      contenedorMes.insertAdjacentHTML('beforeend', generarHtmlTarjetaSupermercado(nombre, prod));
     } else {
-      contenedorDemas.insertAdjacentHTML('beforeend', html);
+      contenedorDemas.insertAdjacentHTML('beforeend', generarHtmlTarjetaSupermercado(nombre, prod));
     }
   });
 }
@@ -652,134 +672,12 @@ function pintarTodosLosProductos() {
 document.addEventListener('DOMContentLoaded', async () => {
   await incluirPartes();
   ajustarOffset();
-  inicializarInventario();
   verificarAccesoInventario();
   pintarCarruselInicio();
-  pintarTodosLosProductos();
+  pintarPaginaProductos();
   iniciarCantidadYCarrito();
   iniciarPagar();
   iniciarCarrusel();
   pintarStockEnTarjetas();
-  iniciarInventario();
+  iniciarInventarioAdmin();
 });
-
-function mostrarReporte(tipo, boton) {
-    const botones = document.querySelectorAll(".btn-reporte");
-    botones.forEach(btn => btn.classList.remove("activo"));
-    boton.classList.add("activo");
-    const contenido = document.getElementById("reportes-contenido");
-    if (tipo === "ventas") {
-        contenido.innerHTML = `
-            <table>
-                <tr>
-                    <th>Fecha</th>
-                    <th>N° Venta</th>
-                    <th>Cliente</th>
-                    <th>Método Pago</th>
-                    <th>Total (S/)</th>
-                    <th>Estado</th>
-                </tr>
-                <tr>
-                    <td>01/02/2026</td>
-                    <td>V001</td>
-                    <td>Juan Pérez</td>
-                    <td>Tarjeta</td>
-                    <td>1500</td>
-                    <td>Completada</td>
-                </tr>
-                <tr>
-                    <td>02/02/2026</td>
-                    <td>V002</td>
-                    <td>María López</td>
-                    <td>Yape</td>
-                    <td>2100</td>
-                    <td>Completada</td>
-                </tr>
-                <tr>
-                    <td>03/02/2026</td>
-                    <td>V003</td>
-                    <td>Carlos Ruiz</td>
-                    <td>Efectivo</td>
-                    <td>890</td>
-                    <td>Pendiente</td>
-                </tr>
-            </table>
-        `;
-    }
-    if (tipo === "inventario") {
-        contenido.innerHTML = `
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Stock</th>
-                    <th>Precio (S/)</th>
-                    <th>Estado</th>
-                </tr>
-                <tr>
-                    <td>P001</td>
-                    <td>Laptop</td>
-                    <td>Tecnología</td>
-                    <td>12</td>
-                    <td>3200</td>
-                    <td>Disponible</td>
-                </tr>
-                <tr>
-                    <td>P002</td>
-                    <td>Mouse</td>
-                    <td>Accesorios</td>
-                    <td>40</td>
-                    <td>45</td>
-                    <td>Disponible</td>
-                </tr>
-                <tr>
-                    <td>P003</td>
-                    <td>Teclado</td>
-                    <td>Accesorios</td>
-                    <td>0</td>
-                    <td>120</td>
-                    <td>Agotado</td>
-                </tr>
-            </table>
-        `;
-    }
-    if (tipo === "clientes") {
-        contenido.innerHTML = `
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Cliente</th>
-                    <th>Email</th>
-                    <th>Teléfono</th>
-                    <th>Compras</th>
-                    <th>Total Gastado (S/)</th>
-                </tr>
-                <tr>
-                    <td>C001</td>
-                    <td>Juan Pérez</td>
-                    <td>juan@mail.com</td>
-                    <td>999111222</td>
-                    <td>5</td>
-                    <td>4500</td>
-                </tr>
-                <tr>
-                    <td>C002</td>
-                    <td>María López</td>
-                    <td>maria@mail.com</td>
-                    <td>988222333</td>
-                    <td>3</td>
-                    <td>2100</td>
-                </tr>
-                <tr>
-                    <td>C003</td>
-                    <td>Carlos Ruiz</td>
-                    <td>carlos@mail.com</td>
-                    <td>977333444</td>
-                    <td>2</td>
-                    <td>890</td>
-                </tr>
-            </table>
-        `;
-    }
-}

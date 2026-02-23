@@ -15,35 +15,91 @@
 
   <main class="inventario">
     <div class="contenedor">
-      
+
       <div id="contenedor-login-inventario" class="caja-login-inventario-centrada">
-        <h2 class="titulo-login-inventario">acceso a inventario</h2>
+        <h2 class="titulo-login-inventario">Acceso a Inventario</h2>
         <form id="formulario-acceso-inventario" class="formulario-acceso-inventario">
-          <input type="text" id="campo-texto-usuario" class="campo-texto-login-inventario" placeholder="usuario">
-          <input type="password" id="campo-texto-clave" class="campo-texto-login-inventario" placeholder="contraseña">
-          <button type="submit" class="boton-ingresar-inventario">ingresar</button>
+          <input type="text" id="campo-texto-usuario" class="campo-texto-login-inventario" placeholder="Usuario">
+          <input type="password" id="campo-texto-clave" class="campo-texto-login-inventario" placeholder="Contraseña">
+          <button type="submit" class="boton-ingresar-inventario">Ingresar</button>
         </form>
       </div>
 
       <div id="contenedor-principal-inventario" hidden>
-        <h1 class="inventario__titulo">Inventario</h1>
+        <h1 class="inventario__titulo">Administración de Inventario</h1>
+
         <form class="inventario__form" id="formInventario">
-          <input class="inventario__campo" id="invNombre" placeholder="Nombre del producto">
-          <input class="inventario__campo" id="invStock" type="number" min="0" placeholder="Stock">
-          <input class="inventario__campo" id="invPrecio" type="number" min="0" step="0.01" placeholder="Precio S/">
-          <input class="inventario__campo" id="invImg" placeholder="URL de imagen">
-          <button class="boton inventario__guardar" type="submit">Guardar</button>
+          <input type="hidden" id="invNombreOriginal">
+          
+          <div class="campo-grupo">
+            <label>Marca</label>
+            <input class="inventario__campo" id="invMarca" placeholder="Ej. Faraon">
+          </div>
+          
+          <div class="campo-grupo">
+            <label>Stock</label>
+            <input class="inventario__campo" id="invStock" type="number" min="0" placeholder="Ej. 10" required>
+          </div>
+          
+          <div class="campo-grupo">
+            <label>Nombre del Producto</label>
+            <input class="inventario__campo" id="invNombre" placeholder="Ej. Arroz Añejo" required>
+          </div>
+          
+          <div class="campo-grupo">
+            <label>Unidad</label>
+            <input class="inventario__campo" id="invUnidad" placeholder="Ej. Bolsa 5kg">
+          </div>
+          
+          <div class="campo-grupo">
+            <label>Precio S/</label>
+            <input class="inventario__campo" id="invPrecio" type="number" min="0" step="0.01" placeholder="Ej. 25.90" required>
+          </div>
+          
+          <div class="campo-grupo">
+            <label>URL de Imagen</label>
+            <input class="inventario__campo" id="invImg" placeholder="Enlace de la imagen">
+          </div>
+
+          <div class="campo-grupo">
+            <label>Categoría</label>
+            <select class="inventario__campo select-tipo-producto" id="invTipo">
+              <option value="mes">Producto del Mes</option>
+              <option value="normal">Todos los Productos</option>
+            </select>
+          </div>
+          
+          <div class="campo-grupo btn-grupo">
+            <button class="boton inventario__guardar" type="submit">Guardar Producto</button>
+          </div>
         </form>
 
+        <h2 class="subtitulo-seccion-inventario-admin">Productos del Mes</h2>
         <div class="inventario__tabla">
           <div class="inventario__fila inventario__fila--encabezado">
-            <div class="inventario__col">Producto</div>
+            <div class="inventario__col">Marca</div>
             <div class="inventario__col">Stock</div>
+            <div class="inventario__col">Nombre</div>
+            <div class="inventario__col">Unidad</div>
             <div class="inventario__col">Precio</div>
             <div class="inventario__col">Imagen</div>
-            <div class="inventario__col">Acciones</div>
+            <div class="inventario__col centrar-texto">Acciones</div>
           </div>
-          <div id="listaInventario"></div>
+          <div id="lista-inventario-mes"></div>
+        </div>
+
+        <h2 class="subtitulo-seccion-inventario-admin margen-superior-grande">Todos los Productos</h2>
+        <div class="inventario__tabla">
+          <div class="inventario__fila inventario__fila--encabezado">
+            <div class="inventario__col">Marca</div>
+            <div class="inventario__col">Stock</div>
+            <div class="inventario__col">Nombre</div>
+            <div class="inventario__col">Unidad</div>
+            <div class="inventario__col">Precio</div>
+            <div class="inventario__col">Imagen</div>
+            <div class="inventario__col centrar-texto">Acciones</div>
+          </div>
+          <div id="lista-inventario-todos"></div>
         </div>
       </div>
 
