@@ -736,46 +736,48 @@ window.mostrarReporte = function(tipo, boton) {
             </table>
         `;
     }
+if (tipo === "inventario") {
+    cargarInventario(); // usa el inventario real
 
-    if (tipo === "inventario") {
-        contenido.innerHTML = `
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Stock</th>
-                    <th>Precio (S/)</th>
-                    <th>Estado</th>
-                </tr>
-                <tr>
-                    <td>P001</td>
-                    <td>Laptop</td>
-                    <td>Tecnología</td>
-                    <td>12</td>
-                    <td>3200</td>
-                    <td>Disponible</td>
-                </tr>
-                <tr>
-                    <td>P002</td>
-                    <td>Mouse</td>
-                    <td>Accesorios</td>
-                    <td>40</td>
-                    <td>45</td>
-                    <td>Disponible</td>
-                </tr>
-                <tr>
-                    <td>P003</td>
-                    <td>Teclado</td>
-                    <td>Accesorios</td>
-                    <td>0</td>
-                    <td>120</td>
-                    <td>Agotado</td>
-                </tr>
-            </table>
+    let filas = `
+        <tr>
+            <th>Producto</th>
+            <th>Marca</th>
+            <th>Unidad</th>
+            <th>Stock</th>
+            <th>Precio (S/)</th>
+            <th>Estado</th>
+        </tr>
+    `;
+
+    Object.keys(inventario).forEach(nombre => {
+        const p = inventario[nombre];
+        const estado = p.s > 0 ? "Disponible" : "Agotado";
+
+        filas += `
+            <tr>
+                <td>${nombre}</td>
+                <td>${p.marca || "-"}</td>
+                <td>${p.unidad || "-"}</td>
+                <td>${p.s}</td>
+                <td>${Number(p.p).toFixed(2)}</td>
+                <td>${estado}</td>
+            </tr>
+        `;
+    });
+
+    if (Object.keys(inventario).length === 0) {
+        filas += `
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    No hay productos registrados
+                </td>
+            </tr>
         `;
     }
 
+    contenido.innerHTML = `<table>${filas}</table>`;
+}
     if (tipo === "clientes") {
         contenido.innerHTML = `
             <table>
